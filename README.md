@@ -3,13 +3,10 @@
 This is an exploration project to understand and build MCP servers using Python and FastMCP.
 This repository has supporting files for a series of blogs on MCP servers.
 
-Blog Part 1: <>
-Blog Part 2: <>
-Stay tuned for upcoming parts!
+- Blog Part 1: MCP: Why All The Hype?
+- Blog Part 2: loading ...
+- Stay tuned for upcoming parts!
 
-## Demo
-
-![Weather MCP Server Integration with Claude Desktop](media/video-demo-weather-claude-integration.gif)
 
 ## What is MCP?
 
@@ -20,7 +17,7 @@ Model Context Protocol (MCP) is an open standard that enables AI applications to
 ```
 exploring-mcp/
 ├── src/
-│   └── 000_dumb_mcp.py    # Simple MCP server example
+│   └── 000_dumb_mcp.py     # Simple MCP server example
 ├── docs/                   # Documentation and guides
 ├── pyproject.toml          # Project dependencies
 └── uv.lock                 # Lock file for reproducible builds
@@ -44,8 +41,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 1. Clone the repository:
 ```bash
-git clone <your-repo-url>
-cd learning-mcp-server
+git clone https://github.com/sagarsrc/exploring-mcp.git
+cd exploring-mcp
 ```
 
 2. Sync dependencies:
@@ -98,7 +95,7 @@ mcp.run(transport="http", host="127.0.0.1", port=8000)
 
 3. Restart Claude Desktop completely
 
-4. Look for the hammer icon (🔨) to confirm MCP tools are loaded
+4. Look for Developer Settings and see if the MCP server is loaded.
 
 ## Development
 
@@ -125,6 +122,7 @@ uv run python src/your_script.py
 - [Official MCP Documentation](https://modelcontextprotocol.io)
 - [FastMCP Documentation](https://gofastmcp.com)
 - [MCP Specification](https://modelcontextprotocol.io/specification)
+- [What is MCP and why you should pay attention](https://waleedk.medium.com/what-is-mcp-and-why-you-should-pay-attention-31524da7733f)
 
 ## Project Goals
 
