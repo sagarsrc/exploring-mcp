@@ -1,6 +1,11 @@
-# Exploring MCP (Model Context Protocol)
+# Exploring MCP (Model Context Protocol) - WIP
 
-A learning project for understanding and building MCP servers using Python and FastMCP.
+This is an exploration project to understand and build MCP servers using Python and FastMCP.
+This repository has supporting files for a series of blogs on MCP servers.
+
+Blog Part 1: <>
+Blog Part 2: <>
+Stay tuned for upcoming parts!
 
 ## Demo
 
@@ -129,6 +134,4 @@ This project aims to:
 3. Explore real-world use cases beyond basic examples
 4. Document industry adoption and best practices
 
-## License
 
-MIT
