@@ -16,7 +16,7 @@ def get_weather(city: str) -> str:
 @mcp.resource("config://settings")
 def get_settings():
     """Provide application settings"""
-    return {"theme": "dark", "language": "en", "version": "1.0"}
+    return {"theme": "dark", "language": "en", "version": "1.0"} ######################################################### ######################################################### #########################################################
 
 
 # Run the server
