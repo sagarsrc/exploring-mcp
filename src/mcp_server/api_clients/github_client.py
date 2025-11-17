@@ -122,6 +122,37 @@ class GitHubAPIClient:
                 return None
             raise
 
+    def create_issue(
+        self,
+        title: str,
+        body: Optional[str] = None,
+        assignees: Optional[List[str]] = None,
+        labels: Optional[List[str]] = None,
+    ) -> Issue:
+        """
+        Create a new issue.
+
+        Args:
+            title: Issue title (required)
+            body: Issue description/body (optional)
+            assignees: List of usernames to assign (optional)
+            labels: List of label names to apply (optional)
+
+        Returns:
+            Created issue object
+        """
+        kwargs = {"title": title}
+
+        if body:
+            kwargs["body"] = body
+        if assignees:
+            kwargs["assignees"] = assignees
+        if labels:
+            kwargs["labels"] = labels
+
+        issue = self.repo.create_issue(**kwargs)
+        return self._convert_issue(issue)
+
     def update_issue_status(
         self, issue_number: int, new_state: Literal["open", "closed"]
     ) -> Optional[Issue]:

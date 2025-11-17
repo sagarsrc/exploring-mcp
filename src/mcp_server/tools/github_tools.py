@@ -28,6 +28,8 @@ from mcp_server.schemas.github_schemas import (
     ListIssuesOutput,
     GetIssueInput,
     GetIssueOutput,
+    CreateIssueInput,
+    CreateIssueOutput,
     UpdateIssueStatusInput,
     UpdateIssueStatusOutput,
     AddIssueCommentInput,
@@ -158,6 +160,91 @@ def create_github_tools(github_client: GitHubAPIClient) -> FastMCP:
 
         except Exception as e:
             raise ToolError(f"Failed to get issue #{issue_number}: {str(e)}")
+
+    @mcp.tool(tags={"github", "issues", "write"})
+    def create_issue(
+        title: str = Field(..., description="Issue title (required)", min_length=1),
+        body: Optional[str] = Field(
+            default=None, description="Issue description/body (supports Markdown)"
+        ),
+        assignees: Optional[str] = Field(
+            default=None,
+            description="Comma-separated usernames to assign (e.g., 'user1,user2')",
+        ),
+        labels: Optional[str] = Field(
+            default=None,
+            description="Comma-separated label names to apply (e.g., 'bug,priority:high')",
+        ),
+    ) -> CreateIssueOutput:
+        """
+        Create a new GitHub issue.
+
+        Creates a new issue in the repository with the specified title and optional
+        description, assignees, and labels. The title is required and must not be empty.
+        Body supports full Markdown formatting including code blocks and links.
+
+        IMPORTANT:
+        - Assignees must have write access to the repository
+        - Labels must already exist in the repository (use list_labels to see available labels)
+
+        Args:
+            title: Issue title (required, must not be empty)
+            body: Issue description/body (supports Markdown formatting)
+            assignees: Comma-separated usernames to assign (e.g., 'user1,user2')
+                      Note: Users must have write access to the repository
+            labels: Comma-separated label names to apply (e.g., 'bug,priority:high')
+                   Note: Labels must already exist in the repository
+
+        Returns:
+            Response containing:
+            - success: Boolean indicating if issue was created successfully
+            - issue: Created issue object with number, title, state, and URL
+            - message: Status message with issue number and URL
+        """
+        try:
+            params = CreateIssueInput(
+                title=title,
+                body=body,
+                assignees=(
+                    [a.strip() for a in assignees.split(",")] if assignees else None
+                ),
+                labels=(
+                    [label.strip() for label in labels.split(",")] if labels else None
+                ),
+            )
+
+            issue = github_client.create_issue(
+                title=params.title,
+                body=params.body,
+                assignees=params.assignees,
+                labels=params.labels,
+            )
+
+            return CreateIssueOutput(
+                success=True,
+                issue=issue,
+                message=f"Successfully created issue #{issue.number}: {issue.html_url}",
+            )
+
+        except Exception as e:
+            error_msg = str(e)
+
+            # Provide helpful error messages for common issues
+            if "422" in error_msg and "assignees" in error_msg.lower():
+                raise ToolError(
+                    f"Failed to create issue: Invalid assignees. "
+                    f"Assignees must have write access to the repository. "
+                    f"GitHub error: {error_msg}"
+                )
+            elif "422" in error_msg and "label" in error_msg.lower():
+                raise ToolError(
+                    f"Failed to create issue: Invalid labels. "
+                    f"Labels must exist in the repository. "
+                    f"Use list_labels tool to see available labels. "
+                    f"GitHub error: {error_msg}"
+                )
+            else:
+                raise ToolError(f"Failed to create issue: {error_msg}")
 
     @mcp.tool(tags={"github", "issues", "write"})
     def update_issue_status(

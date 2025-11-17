@@ -203,6 +203,25 @@ class GetIssueOutput(BaseModel):
     issue: Optional[Issue] = Field(..., description="Issue details, null if not found")
 
 
+class CreateIssueInput(BaseModel):
+    """Input schema for create_issue tool."""
+
+    title: str = Field(..., description="Issue title", min_length=1)
+    body: Optional[str] = Field(default=None, description="Issue description/body")
+    assignees: Optional[List[str]] = Field(
+        default=None, description="List of usernames to assign"
+    )
+    labels: Optional[List[str]] = Field(default=None, description="List of label names")
+
+
+class CreateIssueOutput(BaseModel):
+    """Output schema for create_issue tool."""
+
+    success: bool = Field(..., description="Whether issue was created successfully")
+    issue: Issue = Field(..., description="Created issue details")
+    message: str = Field(..., description="Status message")
+
+
 class UpdateIssueStatusInput(BaseModel):
     """Input schema for update_issue_status tool."""
 
