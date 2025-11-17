@@ -75,7 +75,8 @@ def create_github_tools(github_client: GitHubAPIClient) -> FastMCP:
             description="Sort by: 'created', 'updated', or 'comments' (default: 'created')",
         ),
         direction: str = Field(
-            default="desc", description="Sort direction: 'asc' or 'desc' (default: 'desc')"
+            default="desc",
+            description="Sort direction: 'asc' or 'desc' (default: 'desc')",
         ),
     ) -> ListIssuesOutput:
         """
@@ -362,7 +363,8 @@ def create_github_tools(github_client: GitHubAPIClient) -> FastMCP:
             description="ISO datetime string - only commits after this date (e.g., '2024-01-01T00:00:00Z')",
         ),
         limit: int = Field(
-            default=10, description="Maximum number of commits to return (1-100, default: 10)"
+            default=10,
+            description="Maximum number of commits to return (1-100, default: 10)",
         ),
     ) -> ListCommitsOutput:
         """

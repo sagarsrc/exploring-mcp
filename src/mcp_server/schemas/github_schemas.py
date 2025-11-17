@@ -167,7 +167,9 @@ class CommentCreate(BaseModel):
 class ListIssuesInput(BaseModel):
     """Input schema for list_issues tool."""
 
-    assignee: Optional[str] = Field(default=None, description="Filter by assignee username")
+    assignee: Optional[str] = Field(
+        default=None, description="Filter by assignee username"
+    )
     labels: Optional[str] = Field(
         default=None, description="Comma-separated label names to filter by"
     )
@@ -177,7 +179,9 @@ class ListIssuesInput(BaseModel):
     sort: Literal["created", "updated", "comments"] = Field(
         default="created", description="Sort by field"
     )
-    direction: Literal["asc", "desc"] = Field(default="desc", description="Sort direction")
+    direction: Literal["asc", "desc"] = Field(
+        default="desc", description="Sort direction"
+    )
 
 
 class ListIssuesOutput(BaseModel):
