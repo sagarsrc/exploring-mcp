@@ -23,9 +23,9 @@ from datagen.prs_manager import PRsManager
 
 def main():
     """Main orchestrator for GitHub project setup."""
-    print("="*60)
+    print("=" * 60)
     print("GitHub Project Setup Automation")
-    print("="*60)
+    print("=" * 60)
 
     # Load configuration
     print("\n[1/6] Loading configuration...")
@@ -69,14 +69,18 @@ def main():
     print("\n[4/6] Checking for existing issues/PRs...")
     try:
         # Check if there are existing issues or PRs
-        existing_issues = list(repo.get_issues(state='open'))
-        existing_prs = list(repo.get_pulls(state='open'))
+        existing_issues = list(repo.get_issues(state="open"))
+        existing_prs = list(repo.get_pulls(state="open"))
 
         if existing_issues or existing_prs:
-            print(f"⚠ Found {len(existing_issues)} open issues and {len(existing_prs)} open PRs")
-            response = input("Do you want to clean up (close all issues/PRs and delete branches)? [y/N]: ")
+            print(
+                f"⚠ Found {len(existing_issues)} open issues and {len(existing_prs)} open PRs"
+            )
+            response = input(
+                "Do you want to clean up (close all issues/PRs and delete branches)? [y/N]: "
+            )
 
-            if response.lower() in ['y', 'yes']:
+            if response.lower() in ["y", "yes"]:
                 print("\n🧹 Cleaning up repository...")
                 client.cleanup_repository(repo)
             else:
@@ -113,5 +117,5 @@ def main():
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

@@ -27,9 +27,9 @@ class PRsManager:
         Returns:
             List of created PR objects
         """
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("Creating Pull Requests")
-        print("="*60)
+        print("=" * 60)
 
         default_branch = self.client.get_default_branch(repo)
         created_prs = []
@@ -63,7 +63,7 @@ class PRsManager:
         Returns:
             PullRequest object
         """
-        branch_name = 'feat/streaming-support'
+        branch_name = "feat/streaming-support"
 
         # Create branch
         self.client.create_branch(repo, branch_name, base_branch)
@@ -96,10 +96,10 @@ Closes #1"""
 
         self.client.create_file(
             repo=repo,
-            path='ai-service/streaming.py',
+            path="ai-service/streaming.py",
             content=file_content,
             message=commit_message,
-            branch=branch_name
+            branch=branch_name,
         )
 
         # Create PR
@@ -121,12 +121,12 @@ Closes #1"""
 
         pr = self.client.create_pull_request(
             repo=repo,
-            title='feat(ai): Add SSE streaming for LLM responses',
+            title="feat(ai): Add SSE streaming for LLM responses",
             body=pr_body,
             head=branch_name,
             base=base_branch,
             draft=True,
-            labels=['feature', 'team-ai']
+            labels=["feature", "team-ai"],
         )
 
         return pr
@@ -141,7 +141,7 @@ Closes #1"""
         Returns:
             PullRequest object
         """
-        branch_name = 'fix/chat-history-persistence'
+        branch_name = "fix/chat-history-persistence"
 
         # Create branch
         self.client.create_branch(repo, branch_name, base_branch)
@@ -179,10 +179,10 @@ Closes #2"""
 
         self.client.create_file(
             repo=repo,
-            path='frontend/src/useChatHistory.js',
+            path="frontend/src/useChatHistory.js",
             content=file_content,
             message=commit_message,
-            branch=branch_name
+            branch=branch_name,
         )
 
         # Create PR
@@ -203,12 +203,12 @@ Closes #2"""
 
         pr = self.client.create_pull_request(
             repo=repo,
-            title='fix(frontend): Persist chat history in localStorage',
+            title="fix(frontend): Persist chat history in localStorage",
             body=pr_body,
             head=branch_name,
             base=base_branch,
             draft=False,
-            labels=['bug', 'team-frontend']
+            labels=["bug", "team-frontend"],
         )
 
         return pr

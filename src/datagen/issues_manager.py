@@ -27,9 +27,9 @@ class IssuesManager:
         Returns:
             List of created issue objects
         """
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("Creating Issues")
-        print("="*60)
+        print("=" * 60)
 
         issues_data = self._get_issues_data()
         created_issues = []
@@ -38,15 +38,15 @@ class IssuesManager:
             try:
                 issue = self.client.create_issue(
                     repo=repo,
-                    title=issue_data['title'],
-                    body=issue_data['body'],
-                    labels=issue_data.get('labels', []),
-                    assignee=issue_data.get('assignee')
+                    title=issue_data["title"],
+                    body=issue_data["body"],
+                    labels=issue_data.get("labels", []),
+                    assignee=issue_data.get("assignee"),
                 )
                 created_issues.append(issue)
 
                 # Close issue if marked as done
-                if issue_data.get('close', False):
+                if issue_data.get("close", False):
                     self.client.close_issue(issue)
 
             except Exception as e:
@@ -64,10 +64,10 @@ class IssuesManager:
         """
         return [
             {
-                'title': 'Add streaming support for LLM responses',
-                'labels': ['feature', 'team-ai', 'P1'],
-                'assignee': self.config.get_username('Sagar'),
-                'body': """## Description
+                "title": "Add streaming support for LLM responses",
+                "labels": ["feature", "team-ai", "P1"],
+                "assignee": self.config.get_username("Sagar"),
+                "body": """## Description
 Users want to see responses appear word-by-word instead of waiting for complete response.
 
 ## Tasks
@@ -75,13 +75,13 @@ Users want to see responses appear word-by-word instead of waiting for complete 
 - [ ] Update frontend to handle streaming
 - [ ] Test with Anthropic API
 
-## Effort: 5 points"""
+## Effort: 5 points""",
             },
             {
-                'title': 'Fix chat history not loading on page refresh',
-                'labels': ['bug', 'team-frontend', 'P1'],
-                'assignee': self.config.get_username('Zeeshan'),
-                'body': """## Description
+                "title": "Fix chat history not loading on page refresh",
+                "labels": ["bug", "team-frontend", "P1"],
+                "assignee": self.config.get_username("Zeeshan"),
+                "body": """## Description
 When user refreshes page, chat history disappears. Should persist in localStorage.
 
 ## Tasks
@@ -89,13 +89,13 @@ When user refreshes page, chat history disappears. Should persist in localStorag
 - [x] Load from localStorage on page load
 - [ ] Add migration for existing users
 
-## Effort: 3 points"""
+## Effort: 3 points""",
             },
             {
-                'title': 'Add rate limiting to prevent abuse',
-                'labels': ['feature', 'team-backend', 'P1'],
-                'assignee': self.config.get_username('Swathi'),
-                'body': """## Description
+                "title": "Add rate limiting to prevent abuse",
+                "labels": ["feature", "team-backend", "P1"],
+                "assignee": self.config.get_username("Swathi"),
+                "body": """## Description
 Need to prevent users from spamming the API and racking up LLM costs.
 
 ## Solution
@@ -103,13 +103,13 @@ Need to prevent users from spamming the API and racking up LLM costs.
 - 10 requests per minute per user
 - Return 429 if limit exceeded
 
-## Effort: 5 points"""
+## Effort: 5 points""",
             },
             {
-                'title': 'Improve system prompt template',
-                'labels': ['improvement', 'team-ai', 'P2'],
-                'assignee': self.config.get_username('Neha'),
-                'body': """## Description
+                "title": "Improve system prompt template",
+                "labels": ["improvement", "team-ai", "P2"],
+                "assignee": self.config.get_username("Sagar"),
+                "body": """## Description
 Current system prompt is generic. Need to make it more specific to our use case.
 
 ## Tasks
@@ -117,13 +117,13 @@ Current system prompt is generic. Need to make it more specific to our use case.
 - [ ] Test different templates
 - [ ] A/B test with users
 
-## Effort: 3 points"""
+## Effort: 3 points""",
             },
             {
-                'title': 'Add dark mode toggle to UI',
-                'labels': ['feature', 'team-frontend', 'P2'],
-                'assignee': self.config.get_username('Zeeshan'),
-                'body': """## Description
+                "title": "Add dark mode toggle to UI",
+                "labels": ["feature", "team-frontend", "P2"],
+                "assignee": self.config.get_username("Zeeshan"),
+                "body": """## Description
 Users requesting dark mode for late-night usage.
 
 ## Tasks
@@ -131,26 +131,26 @@ Users requesting dark mode for late-night usage.
 - [ ] Implement theme toggle
 - [ ] Persist preference in localStorage
 
-## Effort: 3 points"""
+## Effort: 3 points""",
             },
             {
-                'title': 'Deploy v1.0 to production',
-                'labels': ['P0', 'team-backend'],
-                'assignee': self.config.get_username('Swathi'),
-                'body': """## Description
+                "title": "Deploy v1.0 to production",
+                "labels": ["P0", "team-backend"],
+                "assignee": self.config.get_username("Swathi"),
+                "body": """## Description
 First production deployment. Need to:
 - [ ] Set up AWS infrastructure (ECS, RDS)
 - [ ] Configure environment variables
 - [ ] Set up monitoring (CloudWatch)
 - [ ] Test with real users
 
-## Effort: 8 points"""
+## Effort: 8 points""",
             },
             {
-                'title': 'Add basic user authentication with Google OAuth',
-                'labels': ['feature', 'team-backend', 'P1'],
-                'assignee': self.config.get_username('Swathi'),
-                'body': """## Description
+                "title": "Add basic user authentication with Google OAuth",
+                "labels": ["feature", "team-backend", "P1"],
+                "assignee": self.config.get_username("Swathi"),
+                "body": """## Description
 Implemented Google OAuth for user login.
 
 ## What was done
@@ -160,13 +160,13 @@ Implemented Google OAuth for user login.
 - Updated frontend login flow
 
 ## Effort: 8 points""",
-                'close': True  # This issue should be closed immediately
+                "close": True,  # This issue should be closed immediately
             },
             {
-                'title': 'Allow users to export chat history as PDF',
-                'labels': ['feature', 'team-frontend', 'P2'],
-                'assignee': self.config.get_username('Zeeshan'),
-                'body': """## Description
+                "title": "Allow users to export chat history as PDF",
+                "labels": ["feature", "team-frontend", "P2"],
+                "assignee": self.config.get_username("Zeeshan"),
+                "body": """## Description
 Users want to save/share their conversations.
 
 ## Tasks
@@ -174,7 +174,7 @@ Users want to save/share their conversations.
 - [ ] Generate PDF using jsPDF
 - [ ] Include timestamps and formatting
 
-## Effort: 5 points"""
+## Effort: 5 points""",
             },
         ]
 
@@ -190,12 +190,12 @@ Users want to save/share their conversations.
         # In Review: #2, #6
         # Done: #7
         return {
-            1: 'In Progress',
-            2: 'In Review',
-            3: 'In Progress',
-            4: 'Backlog',
-            5: 'Backlog',
-            6: 'In Review',
-            7: 'Done',
-            8: 'Backlog',
+            1: "In Progress",
+            2: "In Review",
+            3: "In Progress",
+            4: "Backlog",
+            5: "Backlog",
+            6: "In Review",
+            7: "Done",
+            8: "Backlog",
         }

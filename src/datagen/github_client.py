@@ -51,11 +51,12 @@ class GitHubClient:
         """
         print("\nCreating labels...")
         for name, config in labels.items():
-            self.create_label(repo, name, config['color'], config['description'])
+            self.create_label(repo, name, config["color"], config["description"])
             time.sleep(0.1)  # Rate limiting
 
-    def get_or_create_repo(self, name: str, description: str = "",
-                           private: bool = False):
+    def get_or_create_repo(
+        self, name: str, description: str = "", private: bool = False
+    ):
         """Get existing repo or create new one.
 
         Args:
@@ -74,10 +75,7 @@ class GitHubClient:
             if e.status == 404:
                 print(f"Creating repository '{name}'...")
                 repo = self.user.create_repo(
-                    name=name,
-                    description=description,
-                    private=private,
-                    auto_init=True
+                    name=name, description=description, private=private, auto_init=True
                 )
                 print(f"✓ Created repository: {name}")
                 # Wait for repo to be ready
@@ -85,9 +83,14 @@ class GitHubClient:
                 return repo
             raise
 
-    def create_issue(self, repo, title: str, body: str,
-                    labels: List[str] = None,
-                    assignee: str = None) -> object:
+    def create_issue(
+        self,
+        repo,
+        title: str,
+        body: str,
+        labels: List[str] = None,
+        assignee: str = None,
+    ) -> object:
         """Create an issue in the repository.
 
         Args:
@@ -101,15 +104,15 @@ class GitHubClient:
             Issue object
         """
         kwargs = {
-            'title': title,
-            'body': body,
+            "title": title,
+            "body": body,
         }
 
         if labels:
-            kwargs['labels'] = labels
+            kwargs["labels"] = labels
 
         if assignee:
-            kwargs['assignee'] = assignee
+            kwargs["assignee"] = assignee
 
         try:
             issue = repo.create_issue(**kwargs)
@@ -118,9 +121,11 @@ class GitHubClient:
             return issue
         except GithubException as e:
             # If assignment fails, try without assignee
-            if e.status == 422 and assignee and 'assignee' in str(e):
-                print(f"⚠ User {assignee} cannot be assigned, creating without assignee")
-                kwargs.pop('assignee', None)
+            if e.status == 422 and assignee and "assignee" in str(e):
+                print(
+                    f"⚠ User {assignee} cannot be assigned, creating without assignee"
+                )
+                kwargs.pop("assignee", None)
                 try:
                     issue = repo.create_issue(**kwargs)
                     print(f"✓ Created issue #{issue.number}: {title}")
@@ -138,11 +143,12 @@ class GitHubClient:
         Args:
             issue: Issue object
         """
-        issue.edit(state='closed')
+        issue.edit(state="closed")
         print(f"✓ Closed issue #{issue.number}")
 
-    def create_branch(self, repo, branch_name: str,
-                     from_branch: str = 'main') -> object:
+    def create_branch(
+        self, repo, branch_name: str, from_branch: str = "main"
+    ) -> object:
         """Create a new branch from an existing branch.
 
         Args:
@@ -158,11 +164,10 @@ class GitHubClient:
             try:
                 source = repo.get_branch(from_branch)
             except GithubException:
-                source = repo.get_branch('master')
+                source = repo.get_branch("master")
 
             ref = repo.create_git_ref(
-                ref=f'refs/heads/{branch_name}',
-                sha=source.commit.sha
+                ref=f"refs/heads/{branch_name}", sha=source.commit.sha
             )
             print(f"✓ Created branch: {branch_name}")
             time.sleep(0.5)
@@ -170,11 +175,12 @@ class GitHubClient:
         except GithubException as e:
             if e.status == 422:  # Branch already exists
                 print(f"⚠ Branch already exists: {branch_name}")
-                return repo.get_git_ref(f'heads/{branch_name}')
+                return repo.get_git_ref(f"heads/{branch_name}")
             raise
 
-    def create_file(self, repo, path: str, content: str,
-                   message: str, branch: str = 'main') -> None:
+    def create_file(
+        self, repo, path: str, content: str, message: str, branch: str = "main"
+    ) -> None:
         """Create or update a file in the repository.
 
         Args:
@@ -193,16 +199,13 @@ class GitHubClient:
                     message=message,
                     content=content,
                     sha=contents.sha,
-                    branch=branch
+                    branch=branch,
                 )
                 print(f"✓ Updated file: {path}")
             except GithubException:
                 # File doesn't exist, create it
                 repo.create_file(
-                    path=path,
-                    message=message,
-                    content=content,
-                    branch=branch
+                    path=path, message=message, content=content, branch=branch
                 )
                 print(f"✓ Created file: {path}")
 
@@ -211,10 +214,16 @@ class GitHubClient:
             print(f"✗ Failed to create/update file '{path}': {e}")
             raise
 
-    def create_pull_request(self, repo, title: str, body: str,
-                           head: str, base: str = 'main',
-                           draft: bool = False,
-                           labels: List[str] = None) -> object:
+    def create_pull_request(
+        self,
+        repo,
+        title: str,
+        body: str,
+        head: str,
+        base: str = "main",
+        draft: bool = False,
+        labels: List[str] = None,
+    ) -> object:
         """Create a pull request.
 
         Args:
@@ -234,14 +243,10 @@ class GitHubClient:
             try:
                 repo.get_branch(base)
             except GithubException:
-                base = 'master'
+                base = "master"
 
             pr = repo.create_pull(
-                title=title,
-                body=body,
-                head=head,
-                base=base,
-                draft=draft
+                title=title, body=body, head=head, base=base, draft=draft
             )
 
             if labels:
@@ -275,11 +280,11 @@ class GitHubClient:
 
         # Close and delete all pull requests
         print("\nClosing pull requests...")
-        prs = list(repo.get_pulls(state='all'))
+        prs = list(repo.get_pulls(state="all"))
         for pr in prs:
             try:
-                if pr.state == 'open':
-                    pr.edit(state='closed')
+                if pr.state == "open":
+                    pr.edit(state="closed")
                 print(f"✓ Closed PR #{pr.number}: {pr.title}")
             except GithubException as e:
                 print(f"⚠ Could not close PR #{pr.number}: {e}")
@@ -287,14 +292,14 @@ class GitHubClient:
 
         # Close all issues (open and closed)
         print("\nClosing issues...")
-        issues = list(repo.get_issues(state='all'))
+        issues = list(repo.get_issues(state="all"))
         for issue in issues:
             # Skip pull requests (they show up in issues too)
             if issue.pull_request:
                 continue
             try:
-                if issue.state == 'open':
-                    issue.edit(state='closed')
+                if issue.state == "open":
+                    issue.edit(state="closed")
                 print(f"✓ Closed issue #{issue.number}: {issue.title}")
             except GithubException as e:
                 print(f"⚠ Could not close issue #{issue.number}: {e}")
@@ -306,7 +311,7 @@ class GitHubClient:
         for branch in branches:
             if branch.name != default_branch:
                 try:
-                    ref = repo.get_git_ref(f'heads/{branch.name}')
+                    ref = repo.get_git_ref(f"heads/{branch.name}")
                     ref.delete()
                     print(f"✓ Deleted branch: {branch.name}")
                     time.sleep(0.2)

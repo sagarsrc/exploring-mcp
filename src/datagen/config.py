@@ -21,29 +21,29 @@ class Config:
             # Search for .env in current and parent directories
             current = Path(__file__).resolve()
             for parent in [current.parent] + list(current.parents):
-                env_file = parent / '.env'
+                env_file = parent / ".env"
                 if env_file.exists():
                     load_dotenv(env_file)
                     break
 
         # GitHub credentials
-        self.github_token = os.getenv('GITHUB_TOKEN')
-        self.github_username = os.getenv('GITHUB_USERNAME')
+        self.github_token = os.getenv("GITHUB_TOKEN")
+        self.github_username = os.getenv("GITHUB_USERNAME")
 
         # Repository configuration
-        self.repo_name = os.getenv('REPO_NAME')
-        self.repo_description = os.getenv('REPO_DESCRIPTION')
-        self.repo_visibility = os.getenv('REPO_VISIBILITY', 'public')
+        self.repo_name = os.getenv("REPO_NAME")
+        self.repo_description = os.getenv("REPO_DESCRIPTION")
+        self.repo_visibility = os.getenv("REPO_VISIBILITY", "public")
 
         # Project configuration
-        self.project_name = os.getenv('PROJECT_NAME')
-        self.project_description = os.getenv('PROJECT_DESCRIPTION')
+        self.project_name = os.getenv("PROJECT_NAME")
+        self.project_description = os.getenv("PROJECT_DESCRIPTION")
 
         # Team members (parse from env)
-        self.team_backend = self._parse_team_members(os.getenv('TEAM_BACKEND', ''))
-        self.team_frontend = self._parse_team_members(os.getenv('TEAM_FRONTEND', ''))
-        self.team_ai = self._parse_team_members(os.getenv('TEAM_AI', ''))
-        self.managers = self._parse_team_members(os.getenv('MANAGERS', ''))
+        self.team_backend = self._parse_team_members(os.getenv("TEAM_BACKEND", ""))
+        self.team_frontend = self._parse_team_members(os.getenv("TEAM_FRONTEND", ""))
+        self.team_ai = self._parse_team_members(os.getenv("TEAM_AI", ""))
+        self.managers = self._parse_team_members(os.getenv("MANAGERS", ""))
 
         # Validate required fields
         self._validate()
@@ -63,23 +63,22 @@ class Config:
         if not team_str:
             return members
 
-        for member in team_str.split(','):
+        for member in team_str.split(","):
             member = member.strip()
-            if '|' in member:
-                nickname, username = member.split('|', 1)
-                members.append({
-                    'nickname': nickname.strip(),
-                    'username': username.strip()
-                })
+            if "|" in member:
+                nickname, username = member.split("|", 1)
+                members.append(
+                    {"nickname": nickname.strip(), "username": username.strip()}
+                )
 
         return members
 
     def _validate(self):
         """Validate required configuration fields."""
         required = {
-            'GITHUB_TOKEN': self.github_token,
-            'GITHUB_USERNAME': self.github_username,
-            'REPO_NAME': self.repo_name,
+            "GITHUB_TOKEN": self.github_token,
+            "GITHUB_USERNAME": self.github_username,
+            "REPO_NAME": self.repo_name,
         }
 
         missing = [key for key, value in required.items() if not value]
@@ -92,8 +91,7 @@ class Config:
         Returns:
             List of all team members
         """
-        return (self.team_backend + self.team_frontend +
-                self.team_ai + self.managers)
+        return self.team_backend + self.team_frontend + self.team_ai + self.managers
 
     def get_member_by_nickname(self, nickname: str) -> Dict[str, str]:
         """Get team member by nickname.
@@ -108,7 +106,7 @@ class Config:
             ValueError: If nickname not found
         """
         for member in self.get_all_members():
-            if member['nickname'].lower() == nickname.lower():
+            if member["nickname"].lower() == nickname.lower():
                 return member
 
         raise ValueError(f"Team member with nickname '{nickname}' not found")
@@ -122,27 +120,25 @@ class Config:
         Returns:
             GitHub username
         """
-        return self.get_member_by_nickname(nickname)['username']
+        return self.get_member_by_nickname(nickname)["username"]
 
 
 # Labels configuration
 LABELS = {
     # Priority
-    'P0': {'color': 'b60205', 'description': 'Critical'},
-    'P1': {'color': 'd93f0b', 'description': 'High priority'},
-    'P2': {'color': 'fbca04', 'description': 'Normal priority'},
-
+    "P0": {"color": "b60205", "description": "Critical"},
+    "P1": {"color": "d93f0b", "description": "High priority"},
+    "P2": {"color": "fbca04", "description": "Normal priority"},
     # Type
-    'bug': {'color': 'd73a4a', 'description': 'Bug fix'},
-    'feature': {'color': '0e8a16', 'description': 'New feature'},
-    'improvement': {'color': '1d76db', 'description': 'Enhancement'},
-
+    "bug": {"color": "d73a4a", "description": "Bug fix"},
+    "feature": {"color": "0e8a16", "description": "New feature"},
+    "improvement": {"color": "1d76db", "description": "Enhancement"},
     # Team
-    'team-ai': {'color': '5319e7', 'description': 'AI team'},
-    'team-backend': {'color': '0052cc', 'description': 'Backend team'},
-    'team-frontend': {'color': 'bfdadc', 'description': 'Frontend team'},
+    "team-ai": {"color": "5319e7", "description": "AI team"},
+    "team-backend": {"color": "0052cc", "description": "Backend team"},
+    "team-frontend": {"color": "bfdadc", "description": "Frontend team"},
 }
 
 
 # Project board columns
-PROJECT_COLUMNS = ['Backlog', 'In Progress', 'In Review', 'Done']
+PROJECT_COLUMNS = ["Backlog", "In Progress", "In Review", "Done"]

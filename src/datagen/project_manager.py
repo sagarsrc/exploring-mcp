@@ -29,15 +29,15 @@ class ProjectManager:
         Returns:
             Repository object
         """
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("Setting up Repository")
-        print("="*60)
+        print("=" * 60)
 
         # Create or get repository
         repo = self.client.get_or_create_repo(
             name=self.config.repo_name,
             description=self.config.repo_description,
-            private=(self.config.repo_visibility == 'private')
+            private=(self.config.repo_visibility == "private"),
         )
 
         # Create labels
@@ -59,10 +59,10 @@ class ProjectManager:
         default_branch = self.client.get_default_branch(repo)
 
         folders = [
-            ('backend/.gitkeep', 'Create backend directory'),
-            ('frontend/.gitkeep', 'Create frontend directory'),
-            ('ai-service/.gitkeep', 'Create ai-service directory'),
-            ('docs/.gitkeep', 'Create docs directory'),
+            ("backend/.gitkeep", "Create backend directory"),
+            ("frontend/.gitkeep", "Create frontend directory"),
+            ("ai-service/.gitkeep", "Create ai-service directory"),
+            ("docs/.gitkeep", "Create docs directory"),
         ]
 
         for path, message in folders:
@@ -70,9 +70,9 @@ class ProjectManager:
                 self.client.create_file(
                     repo=repo,
                     path=path,
-                    content='',
+                    content="",
                     message=message,
-                    branch=default_branch
+                    branch=default_branch,
                 )
             except Exception as e:
                 # Folder might already exist, continue
@@ -102,17 +102,18 @@ class ProjectManager:
         try:
             self.client.create_file(
                 repo=repo,
-                path='README.md',
+                path="README.md",
                 content=readme_content,
-                message='Update README with project info',
-                branch=default_branch
+                message="Update README with project info",
+                branch=default_branch,
             )
         except Exception:
             # README might already exist with different content
             pass
 
-    def create_project_board(self, repo, issues: List[object],
-                            status_mapping: Dict[int, str]) -> Optional[object]:
+    def create_project_board(
+        self, repo, issues: List[object], status_mapping: Dict[int, str]
+    ) -> Optional[object]:
         """Create GitHub project board and add issues.
 
         Note: GitHub Projects V2 API requires different approach.
@@ -127,17 +128,19 @@ class ProjectManager:
         Returns:
             Project object or None if creation fails
         """
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("Creating Project Board")
-        print("="*60)
+        print("=" * 60)
 
         print("\n⚠ Note: GitHub Projects V2 requires manual setup via web UI")
         print("  You can add issues to the project board using:")
-        print(f"  gh project item-add <PROJECT_NUMBER> --owner {self.config.github_username} --url <ISSUE_URL>")
+        print(
+            f"  gh project item-add <PROJECT_NUMBER> --owner {self.config.github_username} --url <ISSUE_URL>"
+        )
         print("\n  Issue status mapping:")
 
         for issue in issues:
-            status = status_mapping.get(issue.number, 'Backlog')
+            status = status_mapping.get(issue.number, "Backlog")
             print(f"  - Issue #{issue.number}: {status}")
 
         # Return None as V2 projects require GraphQL API
@@ -152,9 +155,9 @@ class ProjectManager:
             issues: List of created issues
             prs: List of created PRs
         """
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("Setup Complete!")
-        print("="*60)
+        print("=" * 60)
 
         print(f"\n✓ Repository: {repo.html_url}")
         print(f"✓ Issues created: {len(issues)}")
@@ -162,10 +165,14 @@ class ProjectManager:
 
         print("\n📋 Next steps:")
         print("1. Create a GitHub Project board via web UI or gh CLI:")
-        print(f"   gh project create --owner {self.config.github_username} --title \"{self.config.project_name}\"")
+        print(
+            f'   gh project create --owner {self.config.github_username} --title "{self.config.project_name}"'
+        )
         print("\n2. Add issues to the project:")
         for issue in issues:
-            print(f"   gh project item-add <PROJECT_NUM> --owner {self.config.github_username} --url {issue.html_url}")
+            print(
+                f"   gh project item-add <PROJECT_NUM> --owner {self.config.github_username} --url {issue.html_url}"
+            )
 
         print("\n3. Organize issues into columns:")
         print("   - Backlog: Issues #4, #5, #8")
@@ -175,5 +182,5 @@ class ProjectManager:
 
         print("\n🎯 MCP Demo Queries:")
         print('   - "What commits were made today? Create a summary in Notion."')
-        print('   - "Which issues moved to \'In Review\' today? Send update to Slack."')
+        print("   - \"Which issues moved to 'In Review' today? Send update to Slack.\"")
         print('   - "Give me a weekly summary of what the team completed this week."')
