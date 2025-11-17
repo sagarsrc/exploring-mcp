@@ -60,11 +60,11 @@ A basic MCP server with a weather tool and settings resource.
 
 **Run with STDIO (for Claude Desktop):**
 ```bash
-uv run python src/000_dumb_mcp.py
+uv run python examples/000_dumb_mcp.py
 ```
 
 **Run with HTTP transport (for web services):**
-Edit `src/000_dumb_mcp.py` and change:
+Edit `examples/000_dumb_mcp.py` and change:
 ```python
 mcp.run(transport="http", host="127.0.0.1", port=8000)
 ```
@@ -86,7 +86,7 @@ mcp.run(transport="http", host="127.0.0.1", port=8000)
         "--with",
         "fastmcp",
         "python",
-        "/full/path/to/learning-mcp-server/src/000_dumb_mcp.py"
+        "/full/path/to/learning-mcp-server/examples/000_dumb_mcp.py"
       ]
     }
   }

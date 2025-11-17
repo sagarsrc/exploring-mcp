@@ -1,5 +1,6 @@
 # custom
 .venv/
+prompts/
 mcp_servers/
 docs-internal/
 .claude/
@@ -220,3 +221,4 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+.DS_Store
