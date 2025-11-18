@@ -7,7 +7,7 @@ from datetime import datetime
 from fastmcp.server.middleware import Middleware, MiddlewareContext
 
 # Configure logger
-logger = logging.getLogger("gamepac.mcp")
+logger = logging.getLogger("workspace.mcp")
 logger.setLevel(logging.INFO)
 
 # Add console handler if not already present
@@ -23,7 +23,7 @@ if not logger.handlers:
 
 class LoggingMiddleware(Middleware):
     """
-    Logging middleware for GamePac MCP server
+    Logging middleware for workspace MCP server
 
     Logs all tool calls, their arguments, execution time, and results/errors.
     Focuses on operation-level logging rather than message-level logging.
