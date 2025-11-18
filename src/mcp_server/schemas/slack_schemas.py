@@ -27,7 +27,9 @@ class SlackMessage(BaseModel):
     channel: str = Field(..., description="Channel where message was posted")
     ts: str = Field(..., description="Message timestamp (unique ID)")
     text: str = Field(..., description="Message text")
-    success: bool = Field(..., description="Whether the message was posted successfully")
+    success: bool = Field(
+        ..., description="Whether the message was posted successfully"
+    )
     message: str = Field(..., description="Success or error message")
 
 

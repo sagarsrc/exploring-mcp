@@ -49,15 +49,45 @@ async def test_get_repository_info(client: Client):
         result_data = result.data
 
         # Access repository info
-        repo_info = result_data.repository if hasattr(result_data, 'repository') else result_data
+        repo_info = (
+            result_data.repository
+            if hasattr(result_data, "repository")
+            else result_data
+        )
 
-        name = repo_info.name if hasattr(repo_info, 'name') else repo_info.get('name', '')
-        owner = repo_info.owner if hasattr(repo_info, 'owner') else repo_info.get('owner', '')
-        full_name = repo_info.full_name if hasattr(repo_info, 'full_name') else repo_info.get('full_name', '')
-        url = repo_info.html_url if hasattr(repo_info, 'html_url') else repo_info.get('html_url', '')
-        description = repo_info.description if hasattr(repo_info, 'description') else repo_info.get('description', '')
-        default_branch = repo_info.default_branch if hasattr(repo_info, 'default_branch') else repo_info.get('default_branch', '')
-        open_issues = repo_info.open_issues_count if hasattr(repo_info, 'open_issues_count') else repo_info.get('open_issues_count', 0)
+        name = (
+            repo_info.name if hasattr(repo_info, "name") else repo_info.get("name", "")
+        )
+        owner = (
+            repo_info.owner
+            if hasattr(repo_info, "owner")
+            else repo_info.get("owner", "")
+        )
+        full_name = (
+            repo_info.full_name
+            if hasattr(repo_info, "full_name")
+            else repo_info.get("full_name", "")
+        )
+        url = (
+            repo_info.html_url
+            if hasattr(repo_info, "html_url")
+            else repo_info.get("html_url", "")
+        )
+        description = (
+            repo_info.description
+            if hasattr(repo_info, "description")
+            else repo_info.get("description", "")
+        )
+        default_branch = (
+            repo_info.default_branch
+            if hasattr(repo_info, "default_branch")
+            else repo_info.get("default_branch", "")
+        )
+        open_issues = (
+            repo_info.open_issues_count
+            if hasattr(repo_info, "open_issues_count")
+            else repo_info.get("open_issues_count", 0)
+        )
 
         console.print("[green]✅ Repository information:[/green]")
         console.print(f"   [bold]Name:[/bold] {name}")
@@ -73,6 +103,7 @@ async def test_get_repository_info(client: Client):
     except Exception as e:
         console.print(f"[red]❌ ERROR in get_repository_info: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -86,15 +117,19 @@ async def test_list_labels(client: Client):
         result = await client.call_tool(name="list_labels", arguments={})
         result_data = result.data
 
-        count = result_data.count if hasattr(result_data, 'count') else 0
-        labels = result_data.labels if hasattr(result_data, 'labels') else []
+        count = result_data.count if hasattr(result_data, "count") else 0
+        labels = result_data.labels if hasattr(result_data, "labels") else []
 
         console.print(f"[green]✅ Found {count} label(s):[/green]\n")
 
         for i, label in enumerate(labels[:10], 1):  # Show first 10
-            name = label.name if hasattr(label, 'name') else label.get('name', '')
-            color = label.color if hasattr(label, 'color') else label.get('color', '')
-            description = label.description if hasattr(label, 'description') else label.get('description', '')
+            name = label.name if hasattr(label, "name") else label.get("name", "")
+            color = label.color if hasattr(label, "color") else label.get("color", "")
+            description = (
+                label.description
+                if hasattr(label, "description")
+                else label.get("description", "")
+            )
 
             console.print(f"   [bold]{i}. {name}[/bold]")
             console.print(f"      Color: [#{color}]#{color}[/#{color}]")
@@ -106,6 +141,7 @@ async def test_list_labels(client: Client):
     except Exception as e:
         console.print(f"[red]❌ ERROR in list_labels: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -121,16 +157,22 @@ async def test_list_issues(client: Client):
         result = await client.call_tool(name="list_issues", arguments={"state": "open"})
         result_data = result.data
 
-        count = result_data.count if hasattr(result_data, 'count') else 0
-        issues = result_data.issues if hasattr(result_data, 'issues') else []
+        count = result_data.count if hasattr(result_data, "count") else 0
+        issues = result_data.issues if hasattr(result_data, "issues") else []
 
         console.print(f"[green]✅ Found {count} open issue(s):[/green]")
 
         for i, issue in enumerate(issues[:5], 1):  # Show first 5
-            number = issue.number if hasattr(issue, 'number') else issue.get('number', 0)
-            title = issue.title if hasattr(issue, 'title') else issue.get('title', '')
-            assignee = issue.assignee if hasattr(issue, 'assignee') else issue.get('assignee')
-            labels = issue.labels if hasattr(issue, 'labels') else issue.get('labels', [])
+            number = (
+                issue.number if hasattr(issue, "number") else issue.get("number", 0)
+            )
+            title = issue.title if hasattr(issue, "title") else issue.get("title", "")
+            assignee = (
+                issue.assignee if hasattr(issue, "assignee") else issue.get("assignee")
+            )
+            labels = (
+                issue.labels if hasattr(issue, "labels") else issue.get("labels", [])
+            )
 
             console.print(f"   [bold]{i}. #{number}:[/bold] {title}")
             console.print(f"      Assignee: {assignee or 'None'}")
@@ -138,20 +180,27 @@ async def test_list_issues(client: Client):
 
         # Test 2: Filter by label
         console.print("\n[cyan]2. Filtering by 'test' label...[/cyan]")
-        result2 = await client.call_tool(name="list_issues", arguments={"labels": "test", "state": "all"})
+        result2 = await client.call_tool(
+            name="list_issues", arguments={"labels": "test", "state": "all"}
+        )
         result_data2 = result2.data
 
-        count2 = result_data2.count if hasattr(result_data2, 'count') else 0
+        count2 = result_data2.count if hasattr(result_data2, "count") else 0
         console.print(f"[green]✅ Found {count2} issue(s) with 'test' label[/green]")
 
         # Return first issue number if available
         if issues:
-            return issues[0].number if hasattr(issues[0], 'number') else issues[0].get('number')
+            return (
+                issues[0].number
+                if hasattr(issues[0], "number")
+                else issues[0].get("number")
+            )
         return None
 
     except Exception as e:
         console.print(f"[red]❌ ERROR in list_issues: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return None
 
@@ -162,30 +211,46 @@ async def test_get_issue(client: Client, issue_number: int):
     console.print(Panel.fit("TEST: get_issue", style="bold cyan"))
 
     try:
-        result = await client.call_tool(name="get_issue", arguments={"issue_number": issue_number})
+        result = await client.call_tool(
+            name="get_issue", arguments={"issue_number": issue_number}
+        )
         result_data = result.data
 
-        issue = result_data.issue if hasattr(result_data, 'issue') else result_data
+        issue = result_data.issue if hasattr(result_data, "issue") else result_data
 
         if not issue:
             console.print(f"[yellow]⚠️  Issue #{issue_number} not found[/yellow]")
             return False
 
-        number = issue.number if hasattr(issue, 'number') else issue.get('number', 0)
-        title = issue.title if hasattr(issue, 'title') else issue.get('title', '')
-        body = issue.body if hasattr(issue, 'body') else issue.get('body', '')
-        state = issue.state if hasattr(issue, 'state') else issue.get('state', '')
-        assignee = issue.assignee if hasattr(issue, 'assignee') else issue.get('assignee')
-        labels = issue.labels if hasattr(issue, 'labels') else issue.get('labels', [])
-        comments_count = issue.comments_count if hasattr(issue, 'comments_count') else issue.get('comments_count', 0)
-        created_at = issue.created_at if hasattr(issue, 'created_at') else issue.get('created_at', '')
-        html_url = issue.html_url if hasattr(issue, 'html_url') else issue.get('html_url', '')
+        number = issue.number if hasattr(issue, "number") else issue.get("number", 0)
+        title = issue.title if hasattr(issue, "title") else issue.get("title", "")
+        body = issue.body if hasattr(issue, "body") else issue.get("body", "")
+        state = issue.state if hasattr(issue, "state") else issue.get("state", "")
+        assignee = (
+            issue.assignee if hasattr(issue, "assignee") else issue.get("assignee")
+        )
+        labels = issue.labels if hasattr(issue, "labels") else issue.get("labels", [])
+        comments_count = (
+            issue.comments_count
+            if hasattr(issue, "comments_count")
+            else issue.get("comments_count", 0)
+        )
+        created_at = (
+            issue.created_at
+            if hasattr(issue, "created_at")
+            else issue.get("created_at", "")
+        )
+        html_url = (
+            issue.html_url if hasattr(issue, "html_url") else issue.get("html_url", "")
+        )
 
         console.print(f"[green]✅ Retrieved issue #{number}:[/green]")
         console.print(f"   [bold]Title:[/bold] {title}")
         console.print(f"   [bold]State:[/bold] {state}")
         console.print(f"   [bold]Assignee:[/bold] {assignee or 'None'}")
-        console.print(f"   [bold]Labels:[/bold] {', '.join(labels) if labels else 'None'}")
+        console.print(
+            f"   [bold]Labels:[/bold] {', '.join(labels) if labels else 'None'}"
+        )
         console.print(f"   [bold]Comments:[/bold] {comments_count}")
         console.print(f"   [bold]Created:[/bold] {created_at}")
         console.print(f"   [bold]URL:[/bold] [link={html_url}]{html_url}[/link]")
@@ -198,6 +263,7 @@ async def test_get_issue(client: Client, issue_number: int):
     except Exception as e:
         console.print(f"[red]❌ ERROR in get_issue: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -208,19 +274,25 @@ async def test_get_issue_comments(client: Client, issue_number: int):
     console.print(Panel.fit("TEST: get_issue_comments", style="bold cyan"))
 
     try:
-        result = await client.call_tool(name="get_issue_comments", arguments={"issue_number": issue_number})
+        result = await client.call_tool(
+            name="get_issue_comments", arguments={"issue_number": issue_number}
+        )
         result_data = result.data
 
-        count = result_data.count if hasattr(result_data, 'count') else 0
-        comments = result_data.comments if hasattr(result_data, 'comments') else []
+        count = result_data.count if hasattr(result_data, "count") else 0
+        comments = result_data.comments if hasattr(result_data, "comments") else []
 
         console.print(f"[green]✅ Retrieved {count} comment(s):[/green]\n")
 
         for i, comment in enumerate(comments[:5], 1):  # Show first 5
-            comment_id = comment.id if hasattr(comment, 'id') else comment.get('id', 0)
-            body = comment.body if hasattr(comment, 'body') else comment.get('body', '')
-            user = comment.user if hasattr(comment, 'user') else comment.get('user', '')
-            created_at = comment.created_at if hasattr(comment, 'created_at') else comment.get('created_at', '')
+            comment_id = comment.id if hasattr(comment, "id") else comment.get("id", 0)
+            body = comment.body if hasattr(comment, "body") else comment.get("body", "")
+            user = comment.user if hasattr(comment, "user") else comment.get("user", "")
+            created_at = (
+                comment.created_at
+                if hasattr(comment, "created_at")
+                else comment.get("created_at", "")
+            )
 
             console.print(f"   [bold]{i}. Comment #{comment_id}[/bold]")
             console.print(f"      By: [cyan]@{user}[/cyan]")
@@ -234,6 +306,7 @@ async def test_get_issue_comments(client: Client, issue_number: int):
     except Exception as e:
         console.print(f"[red]❌ ERROR in get_issue_comments: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -249,19 +322,25 @@ async def test_list_commits(client: Client):
         result = await client.call_tool(name="list_commits", arguments={"limit": 5})
         result_data = result.data
 
-        count = result_data.count if hasattr(result_data, 'count') else 0
-        commits = result_data.commits if hasattr(result_data, 'commits') else []
+        count = result_data.count if hasattr(result_data, "count") else 0
+        commits = result_data.commits if hasattr(result_data, "commits") else []
 
         console.print(f"[green]✅ Found {count} commit(s):[/green]\n")
 
         for i, commit in enumerate(commits, 1):
-            sha = commit.sha if hasattr(commit, 'sha') else commit.get('sha', '')
-            message = commit.message if hasattr(commit, 'message') else commit.get('message', '')
-            author = commit.author if hasattr(commit, 'author') else commit.get('author', '')
-            date = commit.date if hasattr(commit, 'date') else commit.get('date', '')
+            sha = commit.sha if hasattr(commit, "sha") else commit.get("sha", "")
+            message = (
+                commit.message
+                if hasattr(commit, "message")
+                else commit.get("message", "")
+            )
+            author = (
+                commit.author if hasattr(commit, "author") else commit.get("author", "")
+            )
+            date = commit.date if hasattr(commit, "date") else commit.get("date", "")
 
             # Get first line of commit message
-            message_first_line = message.split('\n')[0] if message else ''
+            message_first_line = message.split("\n")[0] if message else ""
 
             console.print(f"   [bold]{i}. {sha[:7]}:[/bold] {message_first_line[:60]}")
             console.print(f"      Author: [cyan]@{author}[/cyan]")
@@ -272,6 +351,7 @@ async def test_list_commits(client: Client):
     except Exception as e:
         console.print(f"[red]❌ ERROR in list_commits: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -288,14 +368,18 @@ async def test_all_read_operations(issue_number: Optional[int] = None):
         console.print("[red]❌ ERROR: GITHUB_TOKEN environment variable not set[/red]")
         return False
     if not username:
-        console.print("[red]❌ ERROR: GITHUB_USERNAME environment variable not set[/red]")
+        console.print(
+            "[red]❌ ERROR: GITHUB_USERNAME environment variable not set[/red]"
+        )
         return False
     if not repo_name:
         console.print("[red]❌ ERROR: REPO_NAME environment variable not set[/red]")
         return False
 
     console.print("[cyan]🔧 Initializing GitHub client...[/cyan]")
-    github_client = GitHubAPIClient(token=token, repo_owner=username, repo_name=repo_name)
+    github_client = GitHubAPIClient(
+        token=token, repo_owner=username, repo_name=repo_name
+    )
     mcp = create_github_tools(github_client)
 
     # Health check
@@ -326,9 +410,16 @@ async def test_all_read_operations(issue_number: Optional[int] = None):
         # Test 4 & 5: Get issue and comments
         if issue_number:
             results.append(("get_issue", await test_get_issue(client, issue_number)))
-            results.append(("get_issue_comments", await test_get_issue_comments(client, issue_number)))
+            results.append(
+                (
+                    "get_issue_comments",
+                    await test_get_issue_comments(client, issue_number),
+                )
+            )
         else:
-            console.print("\n[yellow]⚠️  WARNING: No issue number provided or found, skipping issue detail tests[/yellow]")
+            console.print(
+                "\n[yellow]⚠️  WARNING: No issue number provided or found, skipping issue detail tests[/yellow]"
+            )
             console.print("   Run: python -m src.tests.github.read <issue_number>")
 
         # Test 6: List commits
@@ -366,7 +457,9 @@ def main():
     if len(sys.argv) > 1:
         try:
             issue_number = int(sys.argv[1])
-            console.print(f"[yellow]📝 Testing with specific issue #{issue_number}[/yellow]\n")
+            console.print(
+                f"[yellow]📝 Testing with specific issue #{issue_number}[/yellow]\n"
+            )
         except ValueError:
             console.print(f"[red]⚠️  Invalid issue number: {sys.argv[1]}[/red]")
             console.print("   Usage: python -m src.tests.github.read [issue_number]")
@@ -377,9 +470,16 @@ def main():
 
     console.print()
     if success:
-        console.print(Panel.fit("[bold green]✅ ALL TESTS PASSED![/bold green]", style="green"))
+        console.print(
+            Panel.fit("[bold green]✅ ALL TESTS PASSED![/bold green]", style="green")
+        )
     else:
-        console.print(Panel.fit("[bold yellow]⚠️  SOME TESTS FAILED OR SKIPPED[/bold yellow]", style="yellow"))
+        console.print(
+            Panel.fit(
+                "[bold yellow]⚠️  SOME TESTS FAILED OR SKIPPED[/bold yellow]",
+                style="yellow",
+            )
+        )
     console.print()
 
 

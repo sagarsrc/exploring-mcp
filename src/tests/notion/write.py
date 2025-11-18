@@ -63,7 +63,9 @@ async def test_create_update_append(client: Client, parent_page_id: str):
     """Test complete workflow: create a child page, then update and append to it."""
 
     parent_page_id = format_notion_id(parent_page_id)
-    console.print(f"[cyan]📄 Creating child page under parent: {parent_page_id}[/cyan]\n")
+    console.print(
+        f"[cyan]📄 Creating child page under parent: {parent_page_id}[/cyan]\n"
+    )
 
     # Step 1: Create a new child page
     console.print(Panel.fit("STEP 1: Creating a new child page", style="bold blue"))
@@ -73,17 +75,7 @@ async def test_create_update_append(client: Client, parent_page_id: str):
         page_title = f"MCP Test Page - {timestamp}"
 
         # Page properties - for child pages, we just need a title
-        page_properties = {
-            "title": {
-                "title": [
-                    {
-                        "text": {
-                            "content": page_title
-                        }
-                    }
-                ]
-            }
-        }
+        page_properties = {"title": {"title": [{"text": {"content": page_title}}]}}
 
         # Initial content blocks
         content_blocks = [
@@ -92,13 +84,9 @@ async def test_create_update_append(client: Client, parent_page_id: str):
                 "type": "heading_1",
                 "heading_1": {
                     "rich_text": [
-                        {
-                            "text": {
-                                "content": "🧪 MCP Notion Integration Test"
-                            }
-                        }
+                        {"text": {"content": "🧪 MCP Notion Integration Test"}}
                     ]
-                }
+                },
             },
             {
                 "object": "block",
@@ -111,8 +99,8 @@ async def test_create_update_append(client: Client, parent_page_id: str):
                             }
                         }
                     ]
-                }
-            }
+                },
+            },
         ]
 
         console.print(f"[cyan]📄 Creating child page:[/cyan] '{page_title}'")
@@ -123,45 +111,44 @@ async def test_create_update_append(client: Client, parent_page_id: str):
                 "parent_type": "page",
                 "parent_id": parent_page_id,
                 "properties": json.dumps(page_properties),
-                "content_blocks": json.dumps(content_blocks)
-            }
+                "content_blocks": json.dumps(content_blocks),
+            },
         )
 
         # Result data is a Pydantic model - access attributes directly
         result_data = create_result.data
-        created_page = result_data.page if hasattr(result_data, 'page') else result_data
-        new_page_id = created_page.id if hasattr(created_page, 'id') else created_page["id"]
-        new_page_url = created_page.url if hasattr(created_page, 'url') else created_page["url"]
+        created_page = result_data.page if hasattr(result_data, "page") else result_data
+        new_page_id = (
+            created_page.id if hasattr(created_page, "id") else created_page["id"]
+        )
+        new_page_url = (
+            created_page.url if hasattr(created_page, "url") else created_page["url"]
+        )
 
         console.print(f"[green]✅ Child page created successfully![/green]")
         console.print(f"   [bold]Page ID:[/bold] {new_page_id}")
-        console.print(f"   [bold]URL:[/bold] [link={new_page_url}]{new_page_url}[/link]")
+        console.print(
+            f"   [bold]URL:[/bold] [link={new_page_url}]{new_page_url}[/link]"
+        )
 
     except Exception as e:
         console.print(f"[red]❌ ERROR creating page: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return False
 
     # Step 2: Update the newly created page
     console.print()
-    console.print(Panel.fit("STEP 2: Updating the newly created page", style="bold blue"))
+    console.print(
+        Panel.fit("STEP 2: Updating the newly created page", style="bold blue")
+    )
 
     try:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         updated_title = f"{page_title} ✅ [Updated]"
 
-        update_properties = {
-            "title": {
-                "title": [
-                    {
-                        "text": {
-                            "content": updated_title
-                        }
-                    }
-                ]
-            }
-        }
+        update_properties = {"title": {"title": [{"text": {"content": updated_title}}]}}
 
         console.print(f"[cyan]✏️  Updating title to:[/cyan] '{updated_title}'")
 
@@ -169,24 +156,27 @@ async def test_create_update_append(client: Client, parent_page_id: str):
             name="update_page",
             arguments={
                 "page_id": new_page_id,
-                "properties": json.dumps(update_properties)
-            }
+                "properties": json.dumps(update_properties),
+            },
         )
 
         result_data = update_result.data
-        message = result_data.message if hasattr(result_data, 'message') else "Updated"
+        message = result_data.message if hasattr(result_data, "message") else "Updated"
         console.print(f"[green]✅ Page updated successfully![/green]")
         console.print(f"   [bold]Message:[/bold] {message}")
 
     except Exception as e:
         console.print(f"[red]❌ ERROR updating page: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return False
 
     # Step 3: Append more content to the page
     console.print()
-    console.print(Panel.fit("STEP 3: Appending content blocks to the page", style="bold blue"))
+    console.print(
+        Panel.fit("STEP 3: Appending content blocks to the page", style="bold blue")
+    )
 
     try:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -195,28 +185,16 @@ async def test_create_update_append(client: Client, parent_page_id: str):
             {
                 "object": "block",
                 "type": "heading_2",
-                "heading_2": {
-                    "rich_text": [
-                        {
-                            "text": {
-                                "content": "✅ Test Results"
-                            }
-                        }
-                    ]
-                }
+                "heading_2": {"rich_text": [{"text": {"content": "✅ Test Results"}}]},
             },
             {
                 "object": "block",
                 "type": "paragraph",
                 "paragraph": {
                     "rich_text": [
-                        {
-                            "text": {
-                                "content": f"Content appended at {timestamp}"
-                            }
-                        }
+                        {"text": {"content": f"Content appended at {timestamp}"}}
                     ]
-                }
+                },
             },
             {
                 "object": "block",
@@ -229,7 +207,7 @@ async def test_create_update_append(client: Client, parent_page_id: str):
                             }
                         }
                     ]
-                }
+                },
             },
             {
                 "object": "block",
@@ -242,7 +220,7 @@ async def test_create_update_append(client: Client, parent_page_id: str):
                             }
                         }
                     ]
-                }
+                },
             },
             {
                 "object": "block",
@@ -255,20 +233,12 @@ async def test_create_update_append(client: Client, parent_page_id: str):
                             }
                         }
                     ]
-                }
+                },
             },
             {
                 "object": "block",
                 "type": "heading_3",
-                "heading_3": {
-                    "rich_text": [
-                        {
-                            "text": {
-                                "content": "Code Sample"
-                            }
-                        }
-                    ]
-                }
+                "heading_3": {"rich_text": [{"text": {"content": "Code Sample"}}]},
             },
             {
                 "object": "block",
@@ -281,29 +251,22 @@ async def test_create_update_append(client: Client, parent_page_id: str):
                             }
                         }
                     ],
-                    "language": "python"
-                }
+                    "language": "python",
+                },
             },
-            {
-                "object": "block",
-                "type": "divider",
-                "divider": {}
-            }
+            {"object": "block", "type": "divider", "divider": {}},
         ]
 
         console.print(f"[cyan]📝 Appending {len(new_blocks)} content blocks...[/cyan]")
 
         append_result = await client.call_tool(
             name="append_to_page",
-            arguments={
-                "page_id": new_page_id,
-                "blocks": json.dumps(new_blocks)
-            }
+            arguments={"page_id": new_page_id, "blocks": json.dumps(new_blocks)},
         )
 
         result_data = append_result.data
-        message = result_data.message if hasattr(result_data, 'message') else "Appended"
-        count = result_data.count if hasattr(result_data, 'count') else len(new_blocks)
+        message = result_data.message if hasattr(result_data, "message") else "Appended"
+        count = result_data.count if hasattr(result_data, "count") else len(new_blocks)
         console.print(f"[green]✅ Content appended successfully![/green]")
         console.print(f"   [bold]Message:[/bold] {message}")
         console.print(f"   [bold]Blocks added:[/bold] {count}")
@@ -311,6 +274,7 @@ async def test_create_update_append(client: Client, parent_page_id: str):
     except Exception as e:
         console.print(f"[red]❌ ERROR appending content: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -326,7 +290,9 @@ async def test_create_update_append(client: Client, parent_page_id: str):
 
     console.print(table)
 
-    console.print(f"\n[bold]📄 Test page created:[/bold] [link={new_page_url}]{new_page_url}[/link]")
+    console.print(
+        f"\n[bold]📄 Test page created:[/bold] [link={new_page_url}]{new_page_url}[/link]"
+    )
     console.print(f"   [bold]Page ID:[/bold] {new_page_id}")
     console.print("\n[cyan]💡 You can now run read.py to verify the content:[/cyan]")
     console.print(f"   python -m src.tests.notion.read {new_page_id}")
@@ -358,8 +324,12 @@ async def test_write_operations(parent_page_id: str = None):
     if not parent_page_id:
         console.print("[red]❌ No parent page ID provided[/red]")
         console.print("\n[yellow]Please provide a parent page ID:[/yellow]")
-        console.print("   [cyan]python -m src.tests.notion.write 2afaa83fae948098bda6de87a3a6295a[/cyan]")
-        console.print("\n[yellow]The test will create a child page under this parent page,[/yellow]")
+        console.print(
+            "   [cyan]python -m src.tests.notion.write 2afaa83fae948098bda6de87a3a6295a[/cyan]"
+        )
+        console.print(
+            "\n[yellow]The test will create a child page under this parent page,[/yellow]"
+        )
         console.print("[yellow]then update it and append content to it.[/yellow]")
         return False
 
@@ -389,7 +359,9 @@ def main():
 
     console.print()
     if success:
-        console.print(Panel.fit("[bold green]✅ ALL TESTS PASSED![/bold green]", style="green"))
+        console.print(
+            Panel.fit("[bold green]✅ ALL TESTS PASSED![/bold green]", style="green")
+        )
     else:
         console.print(Panel.fit("[bold red]❌ TESTS FAILED[/bold red]", style="red"))
     console.print()

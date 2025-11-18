@@ -65,7 +65,9 @@ def create_server() -> FastMCP:
         return JSONResponse(
             {
                 "status": (
-                    "healthy" if (github_healthy and notion_healthy and slack_healthy) else "unhealthy"
+                    "healthy"
+                    if (github_healthy and notion_healthy and slack_healthy)
+                    else "unhealthy"
                 ),
                 "service": Config.SERVER_NAME,
                 "version": Config.SERVER_VERSION,

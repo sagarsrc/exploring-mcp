@@ -68,18 +68,20 @@ async def test_search_pages(client: Client):
 
     try:
         # Search all
-        console.print("\n[cyan]1. Searching all pages and databases (limit 5)...[/cyan]")
+        console.print(
+            "\n[cyan]1. Searching all pages and databases (limit 5)...[/cyan]"
+        )
         result = await client.call_tool(name="search_pages", arguments={"limit": 5})
         result_data = result.data
-        count = result_data.count if hasattr(result_data, 'count') else 0
-        results = result_data.results if hasattr(result_data, 'results') else []
+        count = result_data.count if hasattr(result_data, "count") else 0
+        results = result_data.results if hasattr(result_data, "results") else []
 
         console.print(f"[green]✅ Found {count} results:[/green]")
         for i, item in enumerate(results, 1):
-            item_type = item.object if hasattr(item, 'object') else 'unknown'
-            title = item.title if hasattr(item, 'title') else 'Untitled'
-            item_id = item.id if hasattr(item, 'id') else ''
-            url = item.url if hasattr(item, 'url') else ''
+            item_type = item.object if hasattr(item, "object") else "unknown"
+            title = item.title if hasattr(item, "title") else "Untitled"
+            item_id = item.id if hasattr(item, "id") else ""
+            url = item.url if hasattr(item, "url") else ""
             console.print(f"   [bold]{i}. [{item_type}][/bold] {title}")
             console.print(f"      ID: {item_id}")
             console.print(f"      URL: [link={url}]{url}[/link]")
@@ -89,6 +91,7 @@ async def test_search_pages(client: Client):
     except Exception as e:
         console.print(f"[red]❌ ERROR in search_pages: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -101,26 +104,27 @@ async def test_list_databases(client: Client):
     try:
         result = await client.call_tool(name="list_databases", arguments={"limit": 10})
         result_data = result.data
-        count = result_data.count if hasattr(result_data, 'count') else 0
-        databases = result_data.databases if hasattr(result_data, 'databases') else []
+        count = result_data.count if hasattr(result_data, "count") else 0
+        databases = result_data.databases if hasattr(result_data, "databases") else []
 
         console.print(f"[green]✅ Found {count} database(s):[/green]\n")
         for i, db in enumerate(databases, 1):
-            title = db.title if hasattr(db, 'title') else 'Untitled'
-            db_id = db.id if hasattr(db, 'id') else ''
-            url = db.url if hasattr(db, 'url') else ''
-            created = db.created_time if hasattr(db, 'created_time') else ''
+            title = db.title if hasattr(db, "title") else "Untitled"
+            db_id = db.id if hasattr(db, "id") else ""
+            url = db.url if hasattr(db, "url") else ""
+            created = db.created_time if hasattr(db, "created_time") else ""
             console.print(f"   [bold]{i}. {title}[/bold]")
             console.print(f"      ID: {db_id}")
             console.print(f"      URL: [link={url}]{url}[/link]")
             console.print(f"      Created: {created}")
             console.print()
 
-        return databases[0].id if databases and hasattr(databases[0], 'id') else None
+        return databases[0].id if databases and hasattr(databases[0], "id") else None
 
     except Exception as e:
         console.print(f"[red]❌ ERROR in list_databases: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return None
 
@@ -131,15 +135,21 @@ async def test_get_database(client: Client, database_id: str):
     console.print(Panel.fit("TEST: get_database", style="bold cyan"))
 
     try:
-        result = await client.call_tool(name="get_database", arguments={"database_id": database_id})
+        result = await client.call_tool(
+            name="get_database", arguments={"database_id": database_id}
+        )
         result_data = result.data
-        database = result_data.database if hasattr(result_data, 'database') else result_data
+        database = (
+            result_data.database if hasattr(result_data, "database") else result_data
+        )
 
-        title = database.title if hasattr(database, 'title') else 'Untitled'
-        db_id = database.id if hasattr(database, 'id') else ''
-        url = database.url if hasattr(database, 'url') else ''
-        created = database.created_time if hasattr(database, 'created_time') else ''
-        edited = database.last_edited_time if hasattr(database, 'last_edited_time') else ''
+        title = database.title if hasattr(database, "title") else "Untitled"
+        db_id = database.id if hasattr(database, "id") else ""
+        url = database.url if hasattr(database, "url") else ""
+        created = database.created_time if hasattr(database, "created_time") else ""
+        edited = (
+            database.last_edited_time if hasattr(database, "last_edited_time") else ""
+        )
 
         console.print(f"[green]✅ Retrieved database:[/green] [bold]{title}[/bold]")
         console.print(f"   [bold]ID:[/bold] {db_id}")
@@ -148,16 +158,20 @@ async def test_get_database(client: Client, database_id: str):
         console.print(f"   [bold]Last edited:[/bold] {edited}")
         console.print("\n   [bold]Properties/Schema:[/bold]")
 
-        properties = database.properties if hasattr(database, 'properties') else {}
-        if hasattr(properties, 'items'):
+        properties = database.properties if hasattr(database, "properties") else {}
+        if hasattr(properties, "items"):
             prop_items = properties.items()
-        elif hasattr(properties, '__dict__'):
+        elif hasattr(properties, "__dict__"):
             prop_items = properties.__dict__.items()
         else:
             prop_items = []
 
         for prop_name, prop_data in prop_items:
-            prop_type = prop_data.get('type', 'unknown') if isinstance(prop_data, dict) else getattr(prop_data, 'type', 'unknown')
+            prop_type = (
+                prop_data.get("type", "unknown")
+                if isinstance(prop_data, dict)
+                else getattr(prop_data, "type", "unknown")
+            )
             console.print(f"      - [cyan]{prop_name}:[/cyan] {prop_type}")
 
         return True
@@ -165,6 +179,7 @@ async def test_get_database(client: Client, database_id: str):
     except Exception as e:
         console.print(f"[red]❌ ERROR in get_database: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -177,25 +192,24 @@ async def test_query_database(client: Client, database_id: str):
     try:
         # Query without filter
         console.print("\n[cyan]1. Querying database without filter (limit 5)...[/cyan]")
-        result = await client.call_tool(name="query_database", arguments={
-            "database_id": database_id,
-            "limit": 5
-        })
+        result = await client.call_tool(
+            name="query_database", arguments={"database_id": database_id, "limit": 5}
+        )
         result_data = result.data
-        count = result_data.count if hasattr(result_data, 'count') else 0
-        pages = result_data.pages if hasattr(result_data, 'pages') else []
+        count = result_data.count if hasattr(result_data, "count") else 0
+        pages = result_data.pages if hasattr(result_data, "pages") else []
 
         console.print(f"[green]✅ Found {count} page(s) in database:[/green]")
         for i, page in enumerate(pages, 1):
-            page_id = page.id if hasattr(page, 'id') else ''
-            url = page.url if hasattr(page, 'url') else ''
-            created = page.created_time if hasattr(page, 'created_time') else ''
-            properties = page.properties if hasattr(page, 'properties') else {}
+            page_id = page.id if hasattr(page, "id") else ""
+            url = page.url if hasattr(page, "url") else ""
+            created = page.created_time if hasattr(page, "created_time") else ""
+            properties = page.properties if hasattr(page, "properties") else {}
 
             # Get property keys safely
-            if hasattr(properties, 'keys'):
+            if hasattr(properties, "keys"):
                 prop_keys = list(properties.keys())
-            elif hasattr(properties, '__dict__'):
+            elif hasattr(properties, "__dict__"):
                 prop_keys = list(properties.__dict__.keys())
             else:
                 prop_keys = []
@@ -207,12 +221,13 @@ async def test_query_database(client: Client, database_id: str):
 
         # Return first page ID if available
         if pages:
-            return pages[0].id if hasattr(pages[0], 'id') else None
+            return pages[0].id if hasattr(pages[0], "id") else None
         return None
 
     except Exception as e:
         console.print(f"[red]❌ ERROR in query_database: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return None
 
@@ -226,17 +241,19 @@ async def test_get_page(client: Client, page_id: str):
         page_id = format_notion_id(page_id)
         result = await client.call_tool(name="get_page", arguments={"page_id": page_id})
         result_data = result.data
-        page = result_data.page if hasattr(result_data, 'page') else result_data
+        page = result_data.page if hasattr(result_data, "page") else result_data
 
         if not page:
-            console.print(f"[yellow]⚠️  Page {page_id} not found or not accessible[/yellow]")
+            console.print(
+                f"[yellow]⚠️  Page {page_id} not found or not accessible[/yellow]"
+            )
             return False
 
-        page_id_val = page.id if hasattr(page, 'id') else ''
-        url = page.url if hasattr(page, 'url') else ''
-        created = page.created_time if hasattr(page, 'created_time') else ''
-        edited = page.last_edited_time if hasattr(page, 'last_edited_time') else ''
-        archived = page.archived if hasattr(page, 'archived') else False
+        page_id_val = page.id if hasattr(page, "id") else ""
+        url = page.url if hasattr(page, "url") else ""
+        created = page.created_time if hasattr(page, "created_time") else ""
+        edited = page.last_edited_time if hasattr(page, "last_edited_time") else ""
+        archived = page.archived if hasattr(page, "archived") else False
 
         console.print(f"[green]✅ Retrieved page:[/green]")
         console.print(f"   [bold]ID:[/bold] {page_id_val}")
@@ -246,16 +263,20 @@ async def test_get_page(client: Client, page_id: str):
         console.print(f"   [bold]Archived:[/bold] {archived}")
         console.print(f"\n   [bold]Properties:[/bold]")
 
-        properties = page.properties if hasattr(page, 'properties') else {}
-        if hasattr(properties, 'items'):
+        properties = page.properties if hasattr(page, "properties") else {}
+        if hasattr(properties, "items"):
             prop_items = properties.items()
-        elif hasattr(properties, '__dict__'):
+        elif hasattr(properties, "__dict__"):
             prop_items = properties.__dict__.items()
         else:
             prop_items = []
 
         for prop_name, prop_value in prop_items:
-            prop_type = prop_value.get('type', 'unknown') if isinstance(prop_value, dict) else getattr(prop_value, 'type', 'unknown')
+            prop_type = (
+                prop_value.get("type", "unknown")
+                if isinstance(prop_value, dict)
+                else getattr(prop_value, "type", "unknown")
+            )
             console.print(f"      - [cyan]{prop_name}:[/cyan] {prop_type}")
 
         return True
@@ -263,6 +284,7 @@ async def test_get_page(client: Client, page_id: str):
     except Exception as e:
         console.print(f"[red]❌ ERROR in get_page: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -274,25 +296,33 @@ async def test_get_page_content(client: Client, page_id: str):
 
     try:
         page_id = format_notion_id(page_id)
-        result = await client.call_tool(name="get_page_content", arguments={"page_id": page_id})
+        result = await client.call_tool(
+            name="get_page_content", arguments={"page_id": page_id}
+        )
         result_data = result.data
-        count = result_data.count if hasattr(result_data, 'count') else 0
-        blocks = result_data.blocks if hasattr(result_data, 'blocks') else []
+        count = result_data.count if hasattr(result_data, "count") else 0
+        blocks = result_data.blocks if hasattr(result_data, "blocks") else []
 
         console.print(f"[green]✅ Retrieved {count} content block(s):[/green]\n")
 
         for i, block in enumerate(blocks, 1):
-            block_type = block.type if hasattr(block, 'type') else 'unknown'
-            block_id = block.id if hasattr(block, 'id') else ''
-            has_children = block.has_children if hasattr(block, 'has_children') else False
+            block_type = block.type if hasattr(block, "type") else "unknown"
+            block_id = block.id if hasattr(block, "id") else ""
+            has_children = (
+                block.has_children if hasattr(block, "has_children") else False
+            )
 
             console.print(f"   [bold]{i}. Block type:[/bold] {block_type}")
             console.print(f"      [bold]ID:[/bold] {block_id}")
             console.print(f"      [bold]Has children:[/bold] {has_children}")
 
             # Try to show content preview
-            content = block.content if hasattr(block, 'content') else {}
-            if isinstance(content, dict) and "rich_text" in content and content["rich_text"]:
+            content = block.content if hasattr(block, "content") else {}
+            if (
+                isinstance(content, dict)
+                and "rich_text" in content
+                and content["rich_text"]
+            ):
                 text = content["rich_text"][0].get("plain_text", "")
                 if text:
                     preview = text[:100] + "..." if len(text) > 100 else text
@@ -304,6 +334,7 @@ async def test_get_page_content(client: Client, page_id: str):
     except Exception as e:
         console.print(f"[red]❌ ERROR in get_page_content: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -338,7 +369,9 @@ async def test_all_read_operations(page_id: Optional[str] = None):
         # Test 2: List databases
         db_id = await test_list_databases(client)
         if not db_id:
-            console.print("[yellow]⚠️  WARNING: No databases found, skipping database tests[/yellow]")
+            console.print(
+                "[yellow]⚠️  WARNING: No databases found, skipping database tests[/yellow]"
+            )
         else:
             # Test 3: Get database
             results.append(("get_database", await test_get_database(client, db_id)))
@@ -351,10 +384,16 @@ async def test_all_read_operations(page_id: Optional[str] = None):
         # Test 5 & 6: Get page and content
         if page_id:
             results.append(("get_page", await test_get_page(client, page_id)))
-            results.append(("get_page_content", await test_get_page_content(client, page_id)))
+            results.append(
+                ("get_page_content", await test_get_page_content(client, page_id))
+            )
         else:
-            console.print("\n[yellow]⚠️  WARNING: No page ID provided or found, skipping page tests[/yellow]")
-            console.print("   [cyan]Run: python -m src.tests.notion.read <page_id>[/cyan]")
+            console.print(
+                "\n[yellow]⚠️  WARNING: No page ID provided or found, skipping page tests[/yellow]"
+            )
+            console.print(
+                "   [cyan]Run: python -m src.tests.notion.read <page_id>[/cyan]"
+            )
 
     # Summary
     console.print()
@@ -391,9 +430,16 @@ def main():
 
     console.print()
     if success:
-        console.print(Panel.fit("[bold green]✅ ALL TESTS PASSED![/bold green]", style="green"))
+        console.print(
+            Panel.fit("[bold green]✅ ALL TESTS PASSED![/bold green]", style="green")
+        )
     else:
-        console.print(Panel.fit("[bold yellow]⚠️  SOME TESTS FAILED OR SKIPPED[/bold yellow]", style="yellow"))
+        console.print(
+            Panel.fit(
+                "[bold yellow]⚠️  SOME TESTS FAILED OR SKIPPED[/bold yellow]",
+                style="yellow",
+            )
+        )
     console.print()
 
 

@@ -39,9 +39,17 @@ from mcp_server.tools.github_tools import create_github_tools
 console = Console()
 
 
-async def test_create_issue(client: Client):
-    """Test create_issue tool."""
-    console.print(Panel.fit("STEP 1: Creating a new test issue", style="bold blue"))
+async def test_create_issue(client: Client, project_number: int = None):
+    """Test create_issue tool with optional project assignment."""
+    if project_number:
+        console.print(
+            Panel.fit(
+                "STEP 1: Creating a new test issue with project assignment",
+                style="bold blue",
+            )
+        )
+    else:
+        console.print(Panel.fit("STEP 1: Creating a new test issue", style="bold blue"))
 
     try:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -57,36 +65,47 @@ Testing the `create_issue` tool from the MCP GitHub integration.
 - [x] Issue creation working
 - [ ] Comment addition (will be tested next)
 - [ ] Status update (will be tested last)
+{"- [x] Project assignment" if project_number else ""}
 
 ---
 🤖 *This is an automated test issue. You can safely close it.*
 """
 
         console.print(f"[cyan]Creating issue:[/cyan] '{issue_title}'")
+        if project_number:
+            console.print(f"[cyan]Assigning to project:[/cyan] #{project_number}")
 
-        create_result = await client.call_tool(
-            name="create_issue",
-            arguments={
-                "title": issue_title,
-                "body": issue_body,
-                "labels": "test,automated"
-            }
-        )
+        arguments = {
+            "title": issue_title,
+            "body": issue_body,
+            "labels": "test,automated",
+        }
+
+        if project_number:
+            arguments["project_number"] = project_number
+
+        create_result = await client.call_tool(name="create_issue", arguments=arguments)
 
         result_data = create_result.data
-        issue = result_data.issue if hasattr(result_data, 'issue') else result_data
-        issue_number = issue.number if hasattr(issue, 'number') else issue.get('number')
-        issue_url = issue.html_url if hasattr(issue, 'html_url') else issue.get('html_url')
+        issue = result_data.issue if hasattr(result_data, "issue") else result_data
+        message = result_data.message if hasattr(result_data, "message") else ""
+        issue_number = issue.number if hasattr(issue, "number") else issue.get("number")
+        issue_url = (
+            issue.html_url if hasattr(issue, "html_url") else issue.get("html_url")
+        )
 
         console.print("[green]✅ Issue created successfully![/green]")
         console.print(f"   [bold]Issue #:[/bold] {issue_number}")
         console.print(f"   [bold]URL:[/bold] [link={issue_url}]{issue_url}[/link]")
+        if message:
+            console.print(f"   [bold]Details:[/bold] {message}")
 
         return issue_number
 
     except Exception as e:
         console.print(f"[red]❌ ERROR creating issue: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return None
 
@@ -115,15 +134,18 @@ This comment tests the `add_issue_comment` tool. The tool is working correctly!
 
         comment_result = await client.call_tool(
             name="add_issue_comment",
-            arguments={
-                "issue_number": issue_number,
-                "comment": comment_body
-            }
+            arguments={"issue_number": issue_number, "comment": comment_body},
         )
 
         result_data = comment_result.data
-        comment = result_data.comment if hasattr(result_data, 'comment') else result_data
-        comment_url = comment.html_url if hasattr(comment, 'html_url') else comment.get('html_url', '')
+        comment = (
+            result_data.comment if hasattr(result_data, "comment") else result_data
+        )
+        comment_url = (
+            comment.html_url
+            if hasattr(comment, "html_url")
+            else comment.get("html_url", "")
+        )
 
         console.print("[green]✅ First comment added![/green]")
         console.print(f"   [link={comment_url}]{comment_url}[/link]")
@@ -143,10 +165,7 @@ This comment tests the `add_issue_comment` tool. The tool is working correctly!
 
         await client.call_tool(
             name="add_issue_comment",
-            arguments={
-                "issue_number": issue_number,
-                "comment": comment_body_2
-            }
+            arguments={"issue_number": issue_number, "comment": comment_body_2},
         )
 
         console.print("[green]✅ Second comment added![/green]")
@@ -156,6 +175,7 @@ This comment tests the `add_issue_comment` tool. The tool is working correctly!
     except Exception as e:
         console.print(f"[red]❌ ERROR adding comments: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -170,14 +190,13 @@ async def test_update_status(client: Client, issue_number: int):
 
         close_result = await client.call_tool(
             name="update_issue_status",
-            arguments={
-                "issue_number": issue_number,
-                "new_state": "closed"
-            }
+            arguments={"issue_number": issue_number, "new_state": "closed"},
         )
 
         result_data = close_result.data
-        message = result_data.message if hasattr(result_data, 'message') else "Issue closed"
+        message = (
+            result_data.message if hasattr(result_data, "message") else "Issue closed"
+        )
 
         console.print("[green]✅ Issue closed successfully![/green]")
         console.print(f"   {message}")
@@ -190,14 +209,13 @@ async def test_update_status(client: Client, issue_number: int):
 
         reopen_result = await client.call_tool(
             name="update_issue_status",
-            arguments={
-                "issue_number": issue_number,
-                "new_state": "open"
-            }
+            arguments={"issue_number": issue_number, "new_state": "open"},
         )
 
         result_data = reopen_result.data
-        message = result_data.message if hasattr(result_data, 'message') else "Issue reopened"
+        message = (
+            result_data.message if hasattr(result_data, "message") else "Issue reopened"
+        )
 
         console.print("[green]✅ Issue reopened successfully![/green]")
         console.print(f"   {message}")
@@ -220,10 +238,7 @@ async def test_update_status(client: Client, issue_number: int):
 
         await client.call_tool(
             name="add_issue_comment",
-            arguments={
-                "issue_number": issue_number,
-                "comment": final_comment
-            }
+            arguments={"issue_number": issue_number, "comment": final_comment},
         )
 
         console.print("[green]✅ Final comment added![/green]")
@@ -233,6 +248,7 @@ async def test_update_status(client: Client, issue_number: int):
     except Exception as e:
         console.print(f"[red]❌ ERROR updating status: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -249,14 +265,18 @@ async def test_write_operations(issue_number: int = None):
         console.print("[red]❌ ERROR: GITHUB_TOKEN environment variable not set[/red]")
         return False
     if not username:
-        console.print("[red]❌ ERROR: GITHUB_USERNAME environment variable not set[/red]")
+        console.print(
+            "[red]❌ ERROR: GITHUB_USERNAME environment variable not set[/red]"
+        )
         return False
     if not repo_name:
         console.print("[red]❌ ERROR: REPO_NAME environment variable not set[/red]")
         return False
 
     console.print("[cyan]🔧 Initializing GitHub client...[/cyan]")
-    github_client = GitHubAPIClient(token=token, repo_owner=username, repo_name=repo_name)
+    github_client = GitHubAPIClient(
+        token=token, repo_owner=username, repo_name=repo_name
+    )
     mcp = create_github_tools(github_client)
 
     # Health check
@@ -272,7 +292,9 @@ async def test_write_operations(issue_number: int = None):
     async with Client(mcp) as client:
         if issue_number:
             # Test with existing issue
-            console.print(f"[yellow]🎯 Testing with existing issue #{issue_number}[/yellow]\n")
+            console.print(
+                f"[yellow]🎯 Testing with existing issue #{issue_number}[/yellow]\n"
+            )
 
             # Test comments
             if not await test_add_comment(client, issue_number):
@@ -312,9 +334,15 @@ async def test_write_operations(issue_number: int = None):
         console.print(table)
 
         console.print(f"\n[bold]Test issue:[/bold] #{issue_number}")
-        console.print(f"[bold]Repository:[/bold] https://github.com/{username}/{repo_name}")
-        console.print(f"[bold]Issue URL:[/bold] [link=https://github.com/{username}/{repo_name}/issues/{issue_number}]https://github.com/{username}/{repo_name}/issues/{issue_number}[/link]")
-        console.print("\n[cyan]💡 You can now run read.py to verify the created content:[/cyan]")
+        console.print(
+            f"[bold]Repository:[/bold] https://github.com/{username}/{repo_name}"
+        )
+        console.print(
+            f"[bold]Issue URL:[/bold] [link=https://github.com/{username}/{repo_name}/issues/{issue_number}]https://github.com/{username}/{repo_name}/issues/{issue_number}[/link]"
+        )
+        console.print(
+            "\n[cyan]💡 You can now run read.py to verify the created content:[/cyan]"
+        )
         console.print(f"   python -m src.tests.github.read {issue_number}")
 
     return success
@@ -330,7 +358,9 @@ def main():
     if len(sys.argv) > 1:
         try:
             issue_number = int(sys.argv[1])
-            console.print(f"[yellow]📝 Testing with existing issue #{issue_number}[/yellow]\n")
+            console.print(
+                f"[yellow]📝 Testing with existing issue #{issue_number}[/yellow]\n"
+            )
         except ValueError:
             console.print(f"[red]⚠️  Invalid issue number: {sys.argv[1]}[/red]")
             console.print("   Usage: python -m src.tests.github.write [issue_number]")
@@ -341,7 +371,9 @@ def main():
 
     console.print()
     if success:
-        console.print(Panel.fit("[bold green]✅ ALL TESTS PASSED![/bold green]", style="green"))
+        console.print(
+            Panel.fit("[bold green]✅ ALL TESTS PASSED![/bold green]", style="green")
+        )
     else:
         console.print(Panel.fit("[bold red]❌ TESTS FAILED[/bold red]", style="red"))
     console.print()

@@ -44,11 +44,11 @@ async def test_list_channels(client: Client):
                 "exclude_archived": True,
                 "include_private": True,
                 "limit": 50,
-            }
+            },
         )
         result_data = result.data
-        count = result_data.count if hasattr(result_data, 'count') else 0
-        channels = result_data.channels if hasattr(result_data, 'channels') else []
+        count = result_data.count if hasattr(result_data, "count") else 0
+        channels = result_data.channels if hasattr(result_data, "channels") else []
 
         console.print(f"[green]✅ Found {count} channel(s):[/green]\n")
 
@@ -61,22 +61,28 @@ async def test_list_channels(client: Client):
         table.add_column("Members", justify="right")
 
         for channel in channels[:20]:  # Show first 20
-            name = channel.name if hasattr(channel, 'name') else channel.get('name', '')
-            ch_id = channel.id if hasattr(channel, 'id') else channel.get('id', '')
-            is_private = channel.is_private if hasattr(channel, 'is_private') else channel.get('is_private', False)
-            is_member = channel.is_member if hasattr(channel, 'is_member') else channel.get('is_member', False)
-            num_members = channel.num_members if hasattr(channel, 'num_members') else channel.get('num_members', 0)
+            name = channel.name if hasattr(channel, "name") else channel.get("name", "")
+            ch_id = channel.id if hasattr(channel, "id") else channel.get("id", "")
+            is_private = (
+                channel.is_private
+                if hasattr(channel, "is_private")
+                else channel.get("is_private", False)
+            )
+            is_member = (
+                channel.is_member
+                if hasattr(channel, "is_member")
+                else channel.get("is_member", False)
+            )
+            num_members = (
+                channel.num_members
+                if hasattr(channel, "num_members")
+                else channel.get("num_members", 0)
+            )
 
             ch_type = "Private" if is_private else "Public"
             member_status = "[green]✓[/green]" if is_member else "[red]✗[/red]"
 
-            table.add_row(
-                f"#{name}",
-                ch_id,
-                ch_type,
-                member_status,
-                str(num_members)
-            )
+            table.add_row(f"#{name}", ch_id, ch_type, member_status, str(num_members))
 
         console.print(table)
 
@@ -91,21 +97,24 @@ async def test_list_channels(client: Client):
                 "exclude_archived": True,
                 "include_private": False,
                 "limit": 50,
-            }
+            },
         )
         result_data2 = result2.data
-        count2 = result_data2.count if hasattr(result_data2, 'count') else 0
+        count2 = result_data2.count if hasattr(result_data2, "count") else 0
 
         console.print(f"[green]✅ Found {count2} public channel(s)[/green]")
 
         # Return first channel for use in write tests
         if channels:
-            return channels[0].id if hasattr(channels[0], 'id') else channels[0].get('id')
+            return (
+                channels[0].id if hasattr(channels[0], "id") else channels[0].get("id")
+            )
         return None
 
     except Exception as e:
         console.print(f"[red]❌ ERROR in list_channels: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return None
 
@@ -141,7 +150,9 @@ async def test_all_read_operations():
 
         # Store channel_id for potential use in write tests
         if channel_id:
-            console.print(f"\n[cyan]💡 Example channel ID for testing:[/cyan] {channel_id}")
+            console.print(
+                f"\n[cyan]💡 Example channel ID for testing:[/cyan] {channel_id}"
+            )
             console.print(f"   [yellow]You can use this with write.py[/yellow]")
 
     # Summary
@@ -173,9 +184,16 @@ def main():
 
     console.print()
     if success:
-        console.print(Panel.fit("[bold green]✅ ALL TESTS PASSED![/bold green]", style="green"))
+        console.print(
+            Panel.fit("[bold green]✅ ALL TESTS PASSED![/bold green]", style="green")
+        )
     else:
-        console.print(Panel.fit("[bold yellow]⚠️  SOME TESTS FAILED OR SKIPPED[/bold yellow]", style="yellow"))
+        console.print(
+            Panel.fit(
+                "[bold yellow]⚠️  SOME TESTS FAILED OR SKIPPED[/bold yellow]",
+                style="yellow",
+            )
+        )
     console.print()
 
 

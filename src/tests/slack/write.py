@@ -68,13 +68,13 @@ Testing the `slack_notify` tool from the MCP Slack integration.
             arguments={
                 "channel": channel,
                 "message": message_text,
-            }
+            },
         )
 
         result_data = notify_result.data
-        success = result_data.success if hasattr(result_data, 'success') else False
-        message = result_data.message if hasattr(result_data, 'message') else ""
-        ts = result_data.ts if hasattr(result_data, 'ts') else None
+        success = result_data.success if hasattr(result_data, "success") else False
+        message = result_data.message if hasattr(result_data, "message") else ""
+        ts = result_data.ts if hasattr(result_data, "ts") else None
 
         if success:
             console.print("[green]✅ Notification sent successfully![/green]")
@@ -88,6 +88,7 @@ Testing the `slack_notify` tool from the MCP Slack integration.
     except Exception as e:
         console.print(f"[red]❌ ERROR sending notification: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return None
 
@@ -110,7 +111,9 @@ async def test_send_threaded_reply(client: Client, channel: str, thread_ts: str)
 🎉 *All Slack MCP tools are working correctly!*
 """
 
-        console.print(f"[cyan]Sending threaded reply to message {thread_ts[:10]}...[/cyan]")
+        console.print(
+            f"[cyan]Sending threaded reply to message {thread_ts[:10]}...[/cyan]"
+        )
 
         reply_result = await client.call_tool(
             name="slack_notify",
@@ -118,12 +121,12 @@ async def test_send_threaded_reply(client: Client, channel: str, thread_ts: str)
                 "channel": channel,
                 "message": reply_text,
                 "thread_ts": thread_ts,
-            }
+            },
         )
 
         result_data = reply_result.data
-        success = result_data.success if hasattr(result_data, 'success') else False
-        message = result_data.message if hasattr(result_data, 'message') else ""
+        success = result_data.success if hasattr(result_data, "success") else False
+        message = result_data.message if hasattr(result_data, "message") else ""
 
         if success:
             console.print("[green]✅ Threaded reply sent successfully![/green]")
@@ -136,6 +139,7 @@ async def test_send_threaded_reply(client: Client, channel: str, thread_ts: str)
     except Exception as e:
         console.print(f"[red]❌ ERROR sending threaded reply: {str(e)}[/red]")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -192,8 +196,12 @@ async def test_write_operations(channel: str):
         console.print(table)
 
         console.print(f"\n[bold]Test channel:[/bold] {channel}")
-        console.print("\n[cyan]💡 Check your Slack workspace to see the test messages![/cyan]")
-        console.print("\n[cyan]💡 You can run read.py to list all available channels:[/cyan]")
+        console.print(
+            "\n[cyan]💡 Check your Slack workspace to see the test messages![/cyan]"
+        )
+        console.print(
+            "\n[cyan]💡 You can run read.py to list all available channels:[/cyan]"
+        )
         console.print("   python -m src.tests.slack.read")
 
     return success
@@ -209,7 +217,7 @@ def main():
         console.print("[red]❌ No channel specified[/red]")
         console.print("\n[yellow]Please provide a channel ID or name:[/yellow]")
         console.print("   [cyan]python -m src.tests.slack.write C1234567890[/cyan]")
-        console.print("   [cyan]python -m src.tests.slack.write \"#test-channel\"[/cyan]")
+        console.print('   [cyan]python -m src.tests.slack.write "#test-channel"[/cyan]')
         console.print("\n[yellow]To find channel IDs, run:[/yellow]")
         console.print("   [cyan]python -m src.tests.slack.read[/cyan]")
         return
@@ -226,7 +234,9 @@ def main():
 
     console.print()
     if success:
-        console.print(Panel.fit("[bold green]✅ ALL TESTS PASSED![/bold green]", style="green"))
+        console.print(
+            Panel.fit("[bold green]✅ ALL TESTS PASSED![/bold green]", style="green")
+        )
     else:
         console.print(Panel.fit("[bold red]❌ TESTS FAILED[/bold red]", style="red"))
     console.print()

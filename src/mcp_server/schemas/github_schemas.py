@@ -212,6 +212,9 @@ class CreateIssueInput(BaseModel):
         default=None, description="List of usernames to assign"
     )
     labels: Optional[List[str]] = Field(default=None, description="List of label names")
+    project_number: Optional[int] = Field(
+        default=None, description="Project number to add issue to (optional)", gt=0
+    )
 
 
 class CreateIssueOutput(BaseModel):
@@ -295,3 +298,114 @@ class ListCommitsOutput(BaseModel):
 
     count: int = Field(..., description="Number of commits returned")
     commits: List[Commit] = Field(..., description="List of commits")
+
+
+# ============================================================================
+# GitHub Projects (v2) Schemas
+# ============================================================================
+
+
+class ProjectV2(BaseModel):
+    """GitHub Project (v2) model."""
+
+    id: str = Field(..., description="Project ID")
+    number: int = Field(..., description="Project number")
+    title: str = Field(..., description="Project title")
+    url: str = Field(..., description="Project URL")
+    closed: bool = Field(False, description="Project closed status")
+
+
+class ProjectV2FieldOption(BaseModel):
+    """
+    GitHub Project field option model.
+
+    Represents a single option in a ProjectV2 single-select or iteration field.
+    Must be a proper Pydantic model (not dict) for FastMCP serialization.
+    """
+
+    id: str = Field(..., description="Option ID")
+    name: str = Field(..., description="Option name (e.g., 'Backlog', 'In Progress')")
+
+
+class ProjectV2Field(BaseModel):
+    """
+    GitHub Project field model.
+
+    Represents a field in a GitHub Project (v2) board.
+    Options must be List[ProjectV2FieldOption] for proper FastMCP serialization.
+    Using List[dict] causes FastMCP to create empty Root() objects.
+    """
+
+    id: str = Field(..., description="Field ID")
+    name: str = Field(..., description="Field name (e.g., 'Status', 'Priority')")
+    type: str = Field(..., description="Field type (e.g., 'single_select', 'text')")
+    options: Optional[List[ProjectV2FieldOption]] = Field(
+        None,
+        description="Field options for select fields (must be ProjectV2FieldOption objects, not dicts)",
+    )
+
+
+class ProjectV2Item(BaseModel):
+    """GitHub Project item model."""
+
+    id: str = Field(..., description="Project item ID")
+    content_type: str = Field(..., description="Content type (Issue or PullRequest)")
+    content_number: Optional[int] = Field(None, description="Issue/PR number")
+    field_values: dict = Field(
+        default_factory=dict, description="Field values for this item"
+    )
+
+
+class ListProjectsOutput(BaseModel):
+    """Output schema for list_projects tool."""
+
+    count: int = Field(..., description="Number of projects found")
+    projects: List[ProjectV2] = Field(..., description="List of projects")
+
+
+class AddIssueToProjectInput(BaseModel):
+    """Input schema for add_issue_to_project tool."""
+
+    project_number: int = Field(..., description="Project number", gt=0)
+    issue_number: int = Field(..., description="Issue number to add", gt=0)
+
+
+class AddIssueToProjectOutput(BaseModel):
+    """Output schema for add_issue_to_project tool."""
+
+    success: bool = Field(..., description="Whether issue was added successfully")
+    item_id: Optional[str] = Field(None, description="Project item ID")
+    message: str = Field(..., description="Status message")
+
+
+class UpdateProjectItemInput(BaseModel):
+    """Input schema for update_project_item_field tool."""
+
+    project_number: int = Field(..., description="Project number", gt=0)
+    issue_number: int = Field(..., description="Issue number", gt=0)
+    field_name: str = Field(..., description="Field name (e.g., 'Status', 'Priority')")
+    field_value: str = Field(
+        ..., description="New field value (e.g., 'In Progress', 'Done')"
+    )
+
+
+class UpdateProjectItemOutput(BaseModel):
+    """Output schema for update_project_item_field tool."""
+
+    success: bool = Field(..., description="Whether field was updated successfully")
+    message: str = Field(..., description="Status message")
+
+
+class GetProjectFieldsInput(BaseModel):
+    """Input schema for get_project_fields tool."""
+
+    project_number: int = Field(..., description="Project number", gt=0)
+
+
+class GetProjectFieldsOutput(BaseModel):
+    """Output schema for get_project_fields tool."""
+
+    count: int = Field(..., description="Number of fields found")
+    fields: List[ProjectV2Field] = Field(
+        ..., description="List of project fields with options"
+    )

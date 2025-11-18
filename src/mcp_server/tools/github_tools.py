@@ -40,6 +40,13 @@ from mcp_server.schemas.github_schemas import (
     ListLabelsOutput,
     ListCommitsInput,
     ListCommitsOutput,
+    ListProjectsOutput,
+    GetProjectFieldsInput,
+    GetProjectFieldsOutput,
+    AddIssueToProjectInput,
+    AddIssueToProjectOutput,
+    UpdateProjectItemInput,
+    UpdateProjectItemOutput,
 )
 
 
@@ -175,17 +182,24 @@ def create_github_tools(github_client: GitHubAPIClient) -> FastMCP:
             default=None,
             description="Comma-separated label names to apply (e.g., 'bug,priority:high')",
         ),
+        project_number: Optional[int] = Field(
+            default=None,
+            description="Project number to automatically add issue to (optional)",
+            gt=0,
+        ),
     ) -> CreateIssueOutput:
         """
-        Create a new GitHub issue.
+        Create a new GitHub issue and optionally add it to a project.
 
         Creates a new issue in the repository with the specified title and optional
-        description, assignees, and labels. The title is required and must not be empty.
-        Body supports full Markdown formatting including code blocks and links.
+        description, assignees, labels, and project assignment. The title is required
+        and must not be empty. Body supports full Markdown formatting including code
+        blocks and links.
 
         IMPORTANT:
         - Assignees must have write access to the repository
         - Labels must already exist in the repository (use list_labels to see available labels)
+        - If project_number is provided, the issue will be automatically added to that project
 
         Args:
             title: Issue title (required, must not be empty)
@@ -194,12 +208,13 @@ def create_github_tools(github_client: GitHubAPIClient) -> FastMCP:
                       Note: Users must have write access to the repository
             labels: Comma-separated label names to apply (e.g., 'bug,priority:high')
                    Note: Labels must already exist in the repository
+            project_number: Project number to add issue to (optional)
 
         Returns:
             Response containing:
             - success: Boolean indicating if issue was created successfully
             - issue: Created issue object with number, title, state, and URL
-            - message: Status message with issue number and URL
+            - message: Status message with issue number, URL, and project info if applicable
         """
         try:
             params = CreateIssueInput(
@@ -211,6 +226,7 @@ def create_github_tools(github_client: GitHubAPIClient) -> FastMCP:
                 labels=(
                     [label.strip() for label in labels.split(",")] if labels else None
                 ),
+                project_number=project_number,
             )
 
             issue = github_client.create_issue(
@@ -220,10 +236,23 @@ def create_github_tools(github_client: GitHubAPIClient) -> FastMCP:
                 labels=params.labels,
             )
 
+            message = f"Successfully created issue #{issue.number}: {issue.html_url}"
+
+            # If project_number is provided, add issue to project
+            if project_number:
+                try:
+                    github_client.add_issue_to_project(
+                        project_number=project_number, issue_number=issue.number
+                    )
+                    message += f" and added to project #{project_number}"
+                except Exception as project_error:
+                    # Don't fail the entire operation if project add fails
+                    message += f" (Warning: Failed to add to project #{project_number}: {str(project_error)})"
+
             return CreateIssueOutput(
                 success=True,
                 issue=issue,
-                message=f"Successfully created issue #{issue.number}: {issue.html_url}",
+                message=message,
             )
 
         except Exception as e:
@@ -491,5 +520,322 @@ def create_github_tools(github_client: GitHubAPIClient) -> FastMCP:
 
         except Exception as e:
             raise ToolError(f"Failed to list commits: {str(e)}")
+
+    # ========================================================================
+    # GitHub Projects (v2) Tools
+    # ========================================================================
+
+    @mcp.tool(tags={"github", "projects", "read"})
+    def list_projects() -> ListProjectsOutput:
+        """
+        List all GitHub Projects (v2) for the repository.
+
+        Retrieves all projects associated with the repository including project number,
+        title, URL, and status. Use this to discover available projects before adding
+        issues to them.
+
+        Returns:
+            Response containing:
+            - count: Number of projects found
+            - projects: List of project objects with:
+                - id: Project ID (used for GraphQL operations)
+                - number: Project number (used for tool operations)
+                - title: Project title
+                - url: Project URL
+                - closed: Boolean indicating if project is closed
+        """
+        try:
+            projects = github_client.list_projects()
+
+            return ListProjectsOutput(
+                count=len(projects),
+                projects=projects,
+            )
+
+        except Exception as e:
+            raise ToolError(f"Failed to list projects: {str(e)}")
+
+    @mcp.tool(tags={"github", "projects", "read"})
+    def get_project_fields(
+        project_number: int = Field(..., description="Project number", gt=0),
+    ) -> GetProjectFieldsOutput:
+        """
+        Get all fields and their available options for a GitHub Project.
+
+        Shows all fields (columns) in a project and their available values. This is essential
+        for discovering what Status values, Priority levels, or other custom field options
+        you can use when moving issues around on the project board.
+
+        Use this before update_project_item_field to see:
+        - Available field names (e.g., "Status", "Priority", "Assignee")
+        - Field types (single_select, text, etc.)
+        - Available options for each field (e.g., "Todo", "In Progress", "Done")
+
+        Args:
+            project_number: Project number (use list_projects to find)
+
+        Returns:
+            Response containing:
+            - count: Number of fields in the project
+            - fields: List of field objects with:
+                - id: Field ID (internal use)
+                - name: Field name (e.g., "Status", "Priority")
+                - type: Field type (e.g., "single_select", "text")
+                - options: List of available options with id and name
+                          (e.g., [{"id": "...", "name": "Todo"}, {"id": "...", "name": "Done"}])
+
+        Example output for Status field:
+            {
+                "name": "Status",
+                "type": "single_select",
+                "options": [
+                    {"id": "abc123", "name": "Todo"},
+                    {"id": "def456", "name": "In Progress"},
+                    {"id": "ghi789", "name": "Done"}
+                ]
+            }
+        """
+        try:
+            params = GetProjectFieldsInput(project_number=project_number)
+
+            # Get project
+            projects = github_client.list_projects()
+            project = next(
+                (p for p in projects if p.number == params.project_number), None
+            )
+
+            if not project:
+                raise ToolError(
+                    f"Project #{params.project_number} not found. Use list_projects to see available projects."
+                )
+
+            # Get fields
+            fields = github_client.get_project_fields(project.id)
+
+            return GetProjectFieldsOutput(
+                count=len(fields),
+                fields=fields,
+            )
+
+        except ToolError:
+            raise
+        except Exception as e:
+            raise ToolError(f"Failed to get project fields: {str(e)}")
+
+    @mcp.tool(tags={"github", "projects", "write"})
+    def add_issue_to_project(
+        project_number: int = Field(
+            ..., description="Project number to add issue to", gt=0
+        ),
+        issue_number: int = Field(..., description="Issue number to add", gt=0),
+    ) -> AddIssueToProjectOutput:
+        """
+        Add an issue to a GitHub Project (v2).
+
+        Adds an existing issue to a project board. The issue will appear in the project
+        with default field values. Use update_project_item_field to move it to specific
+        columns or set custom field values.
+
+        IMPORTANT:
+        - Use list_projects to find available project numbers
+        - The issue must exist in the repository
+        - The bot must have write access to the project
+
+        Args:
+            project_number: Project number to add issue to (use list_projects to find)
+            issue_number: Issue number to add to the project
+
+        Returns:
+            Response containing:
+            - success: Boolean indicating if issue was added successfully
+            - item_id: Project item ID (used for updating field values)
+            - message: Status message describing the result
+        """
+        try:
+            params = AddIssueToProjectInput(
+                project_number=project_number, issue_number=issue_number
+            )
+
+            # Get all projects to find the one with matching number
+            projects = github_client.list_projects()
+            project = next(
+                (p for p in projects if p.number == params.project_number), None
+            )
+
+            if not project:
+                return AddIssueToProjectOutput(
+                    success=False,
+                    item_id=None,
+                    message=f"Project #{params.project_number} not found. Use list_projects to see available projects.",
+                )
+
+            # Get issue GraphQL node ID
+            issue_node_id = github_client.get_issue_node_id(params.issue_number)
+            if not issue_node_id:
+                return AddIssueToProjectOutput(
+                    success=False,
+                    item_id=None,
+                    message=f"Issue #{params.issue_number} not found",
+                )
+
+            # Add issue to project
+            item_id = github_client.add_issue_to_project(project.id, issue_node_id)
+
+            if not item_id:
+                return AddIssueToProjectOutput(
+                    success=False,
+                    item_id=None,
+                    message=f"Failed to add issue #{params.issue_number} to project #{params.project_number}",
+                )
+
+            return AddIssueToProjectOutput(
+                success=True,
+                item_id=item_id,
+                message=f"Successfully added issue #{params.issue_number} to project '{project.title}'",
+            )
+
+        except Exception as e:
+            raise ToolError(f"Failed to add issue to project: {str(e)}")
+
+    @mcp.tool(tags={"github", "projects", "write"})
+    def update_project_item_field(
+        project_number: int = Field(..., description="Project number", gt=0),
+        issue_number: int = Field(..., description="Issue number", gt=0),
+        field_name: str = Field(
+            ..., description="Field name (e.g., 'Status', 'Priority')"
+        ),
+        field_value: str = Field(
+            ...,
+            description="New field value (e.g., 'In Progress', 'Done', 'Todo')",
+        ),
+    ) -> UpdateProjectItemOutput:
+        """
+        Update a field value for an issue in a GitHub Project (v2).
+
+        Changes the value of a project field (like Status, Priority, etc.) for an issue
+        that's already in the project. This is how you move issues between columns on
+        the project board.
+
+        Common use cases:
+        - Move issue from "Todo" to "In Progress"
+        - Move issue from "In Progress" to "Done"
+        - Change priority levels
+        - Update custom field values
+
+        IMPORTANT:
+        - The issue must already be in the project (use add_issue_to_project first)
+        - Field names are case-sensitive (e.g., "Status" not "status")
+        - Field values must match exactly what's defined in the project
+        - The bot must have write access to the project
+
+        Args:
+            project_number: Project number (use list_projects to find)
+            issue_number: Issue number already in the project
+            field_name: Field name to update (e.g., "Status", "Priority")
+                       This is case-sensitive and must match the project field name
+            field_value: New value for the field (e.g., "In Progress", "Done", "Todo")
+                        Must match an option defined in the project
+
+        Returns:
+            Response containing:
+            - success: Boolean indicating if field was updated successfully
+            - message: Status message describing the result
+
+        Examples:
+            # Move issue from Todo to In Progress
+            update_project_item_field(
+                project_number=1,
+                issue_number=42,
+                field_name="Status",
+                field_value="In Progress"
+            )
+
+            # Move issue to Done
+            update_project_item_field(
+                project_number=1,
+                issue_number=42,
+                field_name="Status",
+                field_value="Done"
+            )
+        """
+        try:
+            params = UpdateProjectItemInput(
+                project_number=project_number,
+                issue_number=issue_number,
+                field_name=field_name,
+                field_value=field_value,
+            )
+
+            # Get project
+            projects = github_client.list_projects()
+            project = next(
+                (p for p in projects if p.number == params.project_number), None
+            )
+
+            if not project:
+                return UpdateProjectItemOutput(
+                    success=False,
+                    message=f"Project #{params.project_number} not found. Use list_projects to see available projects.",
+                )
+
+            # Get project fields
+            fields = github_client.get_project_fields(project.id)
+            field = next((f for f in fields if f.name == params.field_name), None)
+
+            if not field:
+                available_fields = ", ".join([f.name for f in fields])
+                return UpdateProjectItemOutput(
+                    success=False,
+                    message=f"Field '{params.field_name}' not found in project. Available fields: {available_fields}",
+                )
+
+            # Get option ID for the field value
+            if not field.options:
+                return UpdateProjectItemOutput(
+                    success=False,
+                    message=f"Field '{params.field_name}' is not a single-select field",
+                )
+
+            option = next(
+                (opt for opt in field.options if opt["name"] == params.field_value),
+                None,
+            )
+
+            if not option:
+                available_options = ", ".join([opt["name"] for opt in field.options])
+                return UpdateProjectItemOutput(
+                    success=False,
+                    message=f"Option '{params.field_value}' not found for field '{params.field_name}'. Available options: {available_options}",
+                )
+
+            # Get project item for this issue
+            item_id = github_client.get_project_item_for_issue(
+                project.id, params.issue_number
+            )
+
+            if not item_id:
+                return UpdateProjectItemOutput(
+                    success=False,
+                    message=f"Issue #{params.issue_number} not found in project #{params.project_number}. Use add_issue_to_project first.",
+                )
+
+            # Update the field
+            success = github_client.update_project_item_field(
+                project.id, item_id, field.id, option["id"]
+            )
+
+            if not success:
+                return UpdateProjectItemOutput(
+                    success=False,
+                    message=f"Failed to update field '{params.field_name}' to '{params.field_value}'",
+                )
+
+            return UpdateProjectItemOutput(
+                success=True,
+                message=f"Successfully updated issue #{params.issue_number}: {params.field_name} → '{params.field_value}'",
+            )
+
+        except Exception as e:
+            raise ToolError(f"Failed to update project item field: {str(e)}")
 
     return mcp
