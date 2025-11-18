@@ -6,19 +6,10 @@ import logging
 from datetime import datetime
 from fastmcp.server.middleware import Middleware, MiddlewareContext
 
-# Configure logger
+# Configure logger - handler is configured in server.py via logging.basicConfig()
 logger = logging.getLogger("workspace.mcp")
 logger.setLevel(logging.INFO)
-
-# Add console handler if not already present
-if not logger.handlers:
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+logger.propagate = True  # Let it use the root logger's handler from basicConfig()
 
 
 class LoggingMiddleware(Middleware):
@@ -64,8 +55,6 @@ class LoggingMiddleware(Middleware):
 
     async def on_list_tools(self, context: MiddlewareContext, call_next):
         """Log tool listing requests"""
-        logger.info("[LIST TOOLS] Client requested available tools")
-
         try:
             result = await call_next(context)
             tool_count = len(result) if result else 0
