@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  github-mcp:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.github
+    container_name: github-mcp-server
+    ports:
+      - "8001:8001"
+    environment:
+      - MCP_HOST=0.0.0.0
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_USERNAME=${GITHUB_USERNAME}
+      - REPO_NAME=${REPO_NAME}
+      - REPO_DESCRIPTION=${REPO_DESCRIPTION}
+      - REPO_VISIBILITY=${REPO_VISIBILITY}
+      - PROJECT_NAME=${PROJECT_NAME}
+      - PROJECT_DESCRIPTION=${PROJECT_DESCRIPTION}
+      - TEAM_BACKEND=${TEAM_BACKEND}
+      - TEAM_FRONTEND=${TEAM_FRONTEND}
+      - TEAM_AI=${TEAM_AI}
+      - MANAGERS=${MANAGERS}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  notion-mcp:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.notion
+    container_name: notion-mcp-server
+    ports:
+      - "8002:8002"
+    environment:
+      - MCP_HOST=0.0.0.0
+      - NOTION_TOKEN=${NOTION_TOKEN}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  slack-mcp:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.slack
+    container_name: slack-mcp-server
+    ports:
+      - "8003:8003"
+    environment:
+      - MCP_HOST=0.0.0.0
+      - SLACK_TOKEN=${SLACK_TOKEN}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+networks:
+  default:
+    name: mcp-network

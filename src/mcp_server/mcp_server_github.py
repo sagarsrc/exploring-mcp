@@ -18,11 +18,11 @@ from mcp_server.middleware.logging import LoggingMiddleware
 # Configure root logger for server
 # Only configure if not already configured
 if not logging.root.handlers:
-        logging.basicConfig(
+    logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
-        )
+    )
 logger = logging.getLogger(__name__)
 
 
@@ -98,21 +98,14 @@ mcp = create_server()
 
 
 if __name__ == "__main__":
-    """Run the GitHub MCP server via HTTP using uvicorn."""
-    import uvicorn
-
-    logger.info("=" * 60)
-    logger.info("Starting GitHub MCP Server")
-    logger.info(f"Repository: {Config.get_full_repo_name()}")
-    logger.info("=" * 60)
-
-    # Get ASGI app
-    app = mcp.http_app()
-
+    """Run the GitHub MCP server via HTTP using FastMCP's built-in server."""
     # Get host and port from environment or use defaults
     host = os.getenv("MCP_HOST", "0.0.0.0")
     port = int(os.getenv("GITHUB_MCP_PORT", "8001"))
 
+    logger.info("=" * 60)
+    logger.info("Starting GitHub MCP Server")
+    logger.info(f"Repository: {Config.get_full_repo_name()}")
     logger.info(f"Server binding to http://{host}:{port}")
     logger.info(f"MCP endpoint: http://{host}:{port}/mcp")
     logger.info(f"Health check: http://{host}:{port}/health")
@@ -120,10 +113,5 @@ if __name__ == "__main__":
     logger.info("=" * 60)
     logger.info("GitHub MCP Server ready to accept connections")
 
-    # Run with uvicorn
-    uvicorn.run(
-        app,
-        host=host,
-        port=port,
-        log_level="info",
-    )
+    # Run with FastMCP's built-in HTTP server
+    mcp.run(transport="http", host=host, port=port)
